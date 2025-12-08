@@ -5,17 +5,24 @@ import com.example.carrental.dto.CreateBookingRequest;
 import com.example.carrental.service.BookingService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * Booking endpoints:
+ *  - POST /api/bookings         -> create (PENDING)
+ *  - PUT  /api/bookings/{id}/confirm -> confirm (after payment)
+ *  - PUT  /api/bookings/{id}/cancel  -> cancel
+ *
+ * Add @PreAuthorize annotations as needed for role checks.
+ */
 @RestController
 @RequestMapping("/api/bookings")
 public class BookingController {
 
      private final BookingService bookingService;
 
-     public BookingController(BookingService bookingService) {
-          this.bookingService = bookingService;
-     }
+     public BookingController(BookingService bookingService) { this.bookingService = bookingService; }
 
      @PostMapping
      public ResponseEntity<BookingResponse> createBooking(@Valid @RequestBody CreateBookingRequest req) {
@@ -23,19 +30,14 @@ public class BookingController {
           return ResponseEntity.status(201).body(resp);
      }
 
-     /**
-      * Confirm a booking (e.g., called after payment webhook). Returns 200 with updated booking.
-      * Access should be restricted (owner, admin, or system) — add @PreAuthorize if needed.
-      */
+     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isBookingOwner(#id)")
      @PutMapping("/{id}/confirm")
      public ResponseEntity<BookingResponse> confirmBooking(@PathVariable("id") Long id) {
           BookingResponse resp = bookingService.confirmBooking(id);
           return ResponseEntity.ok(resp);
      }
 
-     /**
-      * Cancel a booking. Accepts optional reason in body.
-      */
+     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isBookingOwner(#id)")
      @PutMapping("/{id}/cancel")
      public ResponseEntity<BookingResponse> cancelBooking(@PathVariable("id") Long id,
                                                           @RequestParam(value = "reason", required = false) String reason) {

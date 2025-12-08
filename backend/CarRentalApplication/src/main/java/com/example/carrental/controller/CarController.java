@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,12 +19,16 @@ public class CarController {
 
      public CarController(CarService carService) { this.carService = carService; }
 
+     // Only owners and admins can create car listings
+     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_OWNER')")
      @PostMapping
      public ResponseEntity<CarResponse> createCar(@Valid @RequestBody CreateCarRequest req) {
           CarResponse resp = carService.createCar(req);
           return ResponseEntity.status(201).body(resp);
      }
 
+     // Owners (of the car) or admins can update a car
+     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isCarOwner(#id)")
      @PutMapping("/{id}")
      public ResponseEntity<CarResponse> updateCar(@PathVariable("id") Long id, @Valid @RequestBody CreateCarRequest req) {
           CarResponse resp = carService.updateCar(id, req);
