@@ -28,7 +28,7 @@ public class CarImageService {
      }
 
      @Transactional
-     public CarImage upload(Long carId, MultipartFile file) throws IOException {
+     public CarImage upload(String carId, MultipartFile file) throws IOException {
           Car car = carRepository.findById(carId)
                   .orElseThrow(() -> new IllegalArgumentException("Car not found"));
 
@@ -51,12 +51,12 @@ public class CarImageService {
      }
 
      @Transactional(readOnly = true)
-     public List<CarImage> listImages(Long carId) {
+     public List<CarImage> listImages(String carId) {
           return carImageRepository.findByCarIdOrderByIsPrimaryDescUploadedAtDesc(carId);
      }
 
      @Transactional
-     public void setPrimary(Long carId, Long imageId) {
+     public void setPrimary(String carId, Long imageId) {
           CarImage target = carImageRepository.findByIdAndCarId(imageId, carId)
                   .orElseThrow(() -> new IllegalArgumentException("Image not found for this car"));
 
@@ -73,7 +73,7 @@ public class CarImageService {
      }
 
      @Transactional
-     public void delete(Long carId, Long imageId) {
+     public void delete(String carId, Long imageId) {
           CarImage img = carImageRepository.findByIdAndCarId(imageId, carId)
                   .orElseThrow(() -> new IllegalArgumentException("Image not found for this car"));
 

@@ -13,8 +13,8 @@ import java.time.OffsetDateTime;
 @Getter
 public class Review {
      @Id
-     @GeneratedValue(strategy = GenerationType.IDENTITY)
-     private Long id;
+     @Column(name = "id", nullable = false, unique = true)
+     private String id;
 
      private Integer rating; // 1-5
      private String comment;

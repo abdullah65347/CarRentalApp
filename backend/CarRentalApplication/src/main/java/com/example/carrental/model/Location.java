@@ -1,5 +1,6 @@
 package com.example.carrental.model;
 
+import com.example.carrental.util.IdGeneratorProvider;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,8 +11,8 @@ import lombok.Setter;
 @Setter
 public class Location {
      @Id
-     @GeneratedValue(strategy = GenerationType.IDENTITY)
-     private Long id;
+     @Column(name = "id", nullable = false, unique = true)
+     private String id;
 
      private String name;
      private String address;
@@ -20,4 +21,11 @@ public class Location {
      private String country;
      private Double lat;
      private Double lng;
+
+     @PrePersist
+     public void ensureId() {
+          if (this.id == null || this.id.isBlank()) {
+               this.id = IdGeneratorProvider.getGenerator().generate("LOC");
+          }
+     }
 }

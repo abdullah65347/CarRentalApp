@@ -1,6 +1,6 @@
 -- Cars table
 CREATE TABLE cars (
-  id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  id VARCHAR(50) NOT NULL PRIMARY KEY ,
   owner_id BIGINT,
   make VARCHAR(100),
   model VARCHAR(100),
@@ -29,9 +29,21 @@ CREATE TABLE car_images (
   CONSTRAINT fk_car_images_car FOREIGN KEY (car_id) REFERENCES cars(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+--Locations
+CREATE TABLE locations (
+  id VARCHAR(50) NOT NULL PRIMARY KEY,
+  name VARCHAR(255),
+  address VARCHAR(1000),
+  city VARCHAR(255),
+  state VARCHAR(255),
+  country VARCHAR(255),
+  lat DOUBLE,
+  lng DOUBLE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- Bookings
 CREATE TABLE bookings (
-  id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  id VARCHAR(50) NOT NULL PRIMARY KEY ,
   user_id BIGINT NOT NULL,
   car_id BIGINT NOT NULL,
   pickup_location_id BIGINT,
@@ -52,7 +64,7 @@ CREATE INDEX idx_booking_car_start_end ON bookings(car_id, start_datetime, end_d
 
 -- Reviews
 CREATE TABLE reviews (
-  id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  id VARCHAR(50) NOT NULL PRIMARY KEY ,
   user_id BIGINT,
   car_id BIGINT,
   rating INT,

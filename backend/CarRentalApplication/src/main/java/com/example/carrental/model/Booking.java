@@ -15,8 +15,8 @@ import java.time.OffsetDateTime;
 @Getter
 public class Booking {
      @Id
-     @GeneratedValue(strategy = GenerationType.IDENTITY)
-     private Long id;
+     @Column(name = "id", nullable = false, unique = true)
+     private String id;
 
      @ManyToOne
      @JoinColumn(name = "user_id", nullable = false)

@@ -8,6 +8,7 @@ import com.example.carrental.model.User;
 import com.example.carrental.repository.CarRepository;
 import com.example.carrental.repository.LocationRepository;
 import com.example.carrental.repository.UserRepository;
+import com.example.carrental.util.UniqueIdGenerator;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -24,17 +25,29 @@ import java.util.stream.Collectors;
 @Service
 public class CarService {
 
+     private final UniqueIdGenerator idGenerator;
      private final CarRepository carRepository;
      private final LocationRepository locationRepository;
      private final UserRepository userRepository;
      private final EntityManager em;
 
      public CarService(CarRepository carRepository, LocationRepository locationRepository,
-                       UserRepository userRepository, EntityManager em) {
+                       UserRepository userRepository, EntityManager em,UniqueIdGenerator idGenerator) {
           this.carRepository = carRepository;
           this.locationRepository = locationRepository;
           this.userRepository = userRepository;
           this.em = em;
+          this.idGenerator = idGenerator;
+     }
+
+     private String generateUniqueCarId() {
+          while (true) {
+               String id = idGenerator.generate("CAR");
+               if (!carRepository.existsById(id)) {
+                    return id;
+               }
+               // Incredibly unlikely to enter retry loop
+          }
      }
 
      @Transactional
@@ -45,6 +58,7 @@ public class CarService {
                        .orElseThrow(() -> new IllegalArgumentException("Owner not found"));
                car.setOwner(owner);
           }
+          car.setId(generateUniqueCarId());
           car.setMake(req.getMake());
           car.setModel(req.getModel());
           car.setYear(req.getYear());
@@ -66,7 +80,7 @@ public class CarService {
      }
 
      @Transactional
-     public CarResponse updateCar(Long id, CreateCarRequest req) {
+     public CarResponse updateCar(String id, CreateCarRequest req) {
           Car car = carRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Car not found"));
           if (req.getOwnerId() != null) {
                User owner = userRepository.findById(req.getOwnerId())
@@ -93,7 +107,7 @@ public class CarService {
           return mapToResponse(saved);
      }
 
-     public CarResponse getCar(Long id) {
+     public CarResponse getCar(String id) {
           Car car = carRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Car not found"));
           return mapToResponse(car);
      }

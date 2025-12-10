@@ -13,13 +13,13 @@ import java.time.OffsetDateTime;
 @NoArgsConstructor
 public class CreateBookingRequest {
      @NotNull
-     private Long carId;
+     private String carId;
 
      @NotNull
-     private Long pickupLocationId;
+     private String pickupLocationId;
 
      @NotNull
-     private Long dropoffLocationId;
+     private String dropoffLocationId;
 
      @NotNull
      private OffsetDateTime startDatetime;

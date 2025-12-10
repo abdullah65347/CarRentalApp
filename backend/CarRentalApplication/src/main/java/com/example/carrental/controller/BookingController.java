@@ -32,14 +32,14 @@ public class BookingController {
 
      @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isBookingOwner(#id)")
      @PutMapping("/{id}/confirm")
-     public ResponseEntity<BookingResponse> confirmBooking(@PathVariable("id") Long id) {
+     public ResponseEntity<BookingResponse> confirmBooking(@PathVariable("id") String id) {
           BookingResponse resp = bookingService.confirmBooking(id);
           return ResponseEntity.ok(resp);
      }
 
      @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isBookingOwner(#id)")
      @PutMapping("/{id}/cancel")
-     public ResponseEntity<BookingResponse> cancelBooking(@PathVariable("id") Long id,
+     public ResponseEntity<BookingResponse> cancelBooking(@PathVariable("id") String id,
                                                           @RequestParam(value = "reason", required = false) String reason) {
           BookingResponse resp = bookingService.cancelBooking(id, reason);
           return ResponseEntity.ok(resp);

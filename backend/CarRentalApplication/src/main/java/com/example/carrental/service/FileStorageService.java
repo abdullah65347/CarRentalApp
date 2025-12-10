@@ -31,7 +31,7 @@ public class FileStorageService {
      /**
       * Store file and return the public URL path (relative). Does basic validation of filename.
       */
-     public String storeFile(MultipartFile file, Long carId) throws IOException {
+     public String storeFile(MultipartFile file, String carId) throws IOException {
           String original = StringUtils.cleanPath(file.getOriginalFilename());
           String ext = "";
           int idx = original.lastIndexOf('.');

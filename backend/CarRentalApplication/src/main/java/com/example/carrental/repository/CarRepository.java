@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
-public interface CarRepository extends JpaRepository<Car, Long> {
+public interface CarRepository extends JpaRepository<Car, String> {
      // custom queries (search/filter) will be added later
 
      /**
@@ -18,6 +18,6 @@ public interface CarRepository extends JpaRepository<Car, Long> {
       */
      @Lock(LockModeType.PESSIMISTIC_WRITE)
      @Query("SELECT c FROM Car c WHERE c.id = :id")
-     Optional<Car> findByIdForUpdate(@Param("id") Long id);
+     Optional<Car> findByIdForUpdate(@Param("id") String id);
 
 }

@@ -5,6 +5,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ReviewRepository extends JpaRepository<Review, Long> {
-     Page<Review> findByCarIdOrderByCreatedAtDesc(Long carId, Pageable pageable);
+public interface ReviewRepository extends JpaRepository<Review, String> {
+     Page<Review> findByCarIdOrderByCreatedAtDesc(String carId, Pageable pageable);
 }

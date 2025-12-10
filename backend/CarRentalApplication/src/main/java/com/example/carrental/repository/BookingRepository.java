@@ -8,16 +8,16 @@ import java.time.OffsetDateTime;
 import org.springframework.data.domain.Pageable;
 import java.util.List;
 
-public interface BookingRepository extends JpaRepository<Booking, Long> {
+public interface BookingRepository extends JpaRepository<Booking, String> {
 
      @Query("SELECT COUNT(b) > 0 FROM Booking b WHERE b.car.id = :carId AND b.status IN :activeStatuses " +
              "AND NOT (b.endDatetime <= :start OR b.startDatetime >= :end)")
-     boolean existsOverlappingBooking(@Param("carId") Long carId,
+     boolean existsOverlappingBooking(@Param("carId") String carId,
                                       @Param("start") OffsetDateTime start,
                                       @Param("end") OffsetDateTime end,
                                       @Param("activeStatuses") java.util.List<String> activeStatuses);
 
-     boolean existsByUserIdAndCarIdAndStatus(Long userId, Long carId, String status);
+     boolean existsByUserIdAndCarIdAndStatus(Long userId, String carId, String status);
 
      // find pending bookings older than cutoff (used by cleanup)
      List<Booking> findByStatusAndCreatedAtBefore(String status, OffsetDateTime cutoff);

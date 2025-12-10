@@ -9,8 +9,8 @@ import java.time.OffsetDateTime;
 @Getter
 @Setter
 public class BookingResponse {
-     private Long id;
-     private Long carId;
+     private String id;
+     private String carId;
      private Long userId;
      private OffsetDateTime startDatetime;
      private OffsetDateTime endDatetime;

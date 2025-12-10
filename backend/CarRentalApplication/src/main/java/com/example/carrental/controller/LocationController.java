@@ -35,7 +35,7 @@ public class LocationController {
      }
 
      @GetMapping("/{id}")
-     public ResponseEntity<Location> getLocation(@PathVariable("id") Long id) {
+     public ResponseEntity<Location> getLocation(@PathVariable("id") String id) {
           Location loc = locationRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Location not found"));
           return ResponseEntity.ok(loc);
      }

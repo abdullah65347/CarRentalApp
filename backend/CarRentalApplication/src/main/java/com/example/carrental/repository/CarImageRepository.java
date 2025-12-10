@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CarImageRepository extends JpaRepository<CarImage, Long> {
-     List<CarImage> findByCarIdOrderByIsPrimaryDescUploadedAtDesc(Long carId);
-     Optional<CarImage> findByIdAndCarId(Long id, Long carId);
-     void deleteByIdAndCarId(Long id, Long carId);
+     List<CarImage> findByCarIdOrderByIsPrimaryDescUploadedAtDesc(String carId);
+     Optional<CarImage> findByIdAndCarId(Long id, String carId);
+     void deleteByIdAndCarId(Long id, String carId);
 }

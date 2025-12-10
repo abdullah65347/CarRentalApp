@@ -30,13 +30,13 @@ public class CarController {
      // Owners (of the car) or admins can update a car
      @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isCarOwner(#id)")
      @PutMapping("/{id}")
-     public ResponseEntity<CarResponse> updateCar(@PathVariable("id") Long id, @Valid @RequestBody CreateCarRequest req) {
+     public ResponseEntity<CarResponse> updateCar(@PathVariable("id") String id, @Valid @RequestBody CreateCarRequest req) {
           CarResponse resp = carService.updateCar(id, req);
           return ResponseEntity.ok(resp);
      }
 
      @GetMapping("/{id}")
-     public ResponseEntity<CarResponse> getCar(@PathVariable("id") Long id) {
+     public ResponseEntity<CarResponse> getCar(@PathVariable("id") String id) {
           CarResponse resp = carService.getCar(id);
           return ResponseEntity.ok(resp);
      }

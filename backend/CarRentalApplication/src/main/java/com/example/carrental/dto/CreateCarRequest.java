@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @Getter
 public class CreateCarRequest {
-     private Long ownerId; // optional
+     private Long ownerId;
 
      @Size(max = 100)
      private String make;
@@ -40,7 +40,7 @@ public class CreateCarRequest {
      private String description;
 
      @NotNull
-     private Long locationId;
+     private String locationId;
 
      @Size(max = 50)
      private String status; // ACTIVE / INACTIVE

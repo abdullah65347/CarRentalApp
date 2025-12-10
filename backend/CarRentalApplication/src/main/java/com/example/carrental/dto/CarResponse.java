@@ -6,7 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CarResponse {
-     private Long id;
+     private String id;
      private Long ownerId;
      private String make;
      private String model;
@@ -18,6 +18,6 @@ public class CarResponse {
      private String fuelType;
      private Double pricePerDay;
      private String description;
-     private Long locationId;
+     private String locationId;
      private String status;
 }

@@ -21,21 +21,21 @@ public class CarImageController {
      }
      @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isCarOwner(#carId)")
      @PostMapping
-     public ResponseEntity<CarImage> uploadImage(@PathVariable("carId") Long carId,
+     public ResponseEntity<CarImage> uploadImage(@PathVariable("carId") String carId,
                                                  @RequestParam("file") @NotNull MultipartFile file) throws IOException {
           CarImage saved = carImageService.upload(carId, file);
           return ResponseEntity.status(201).body(saved);
      }
 
      @GetMapping
-     public ResponseEntity<List<CarImage>> listImages(@PathVariable("carId") Long carId) {
+     public ResponseEntity<List<CarImage>> listImages(@PathVariable("carId") String carId) {
           List<CarImage> imgs = carImageService.listImages(carId);
           return ResponseEntity.ok(imgs);
      }
 
      @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isCarOwner(#carId)")
      @PutMapping("/{imageId}/primary")
-     public ResponseEntity<Void> setPrimary(@PathVariable("carId") Long carId,
+     public ResponseEntity<Void> setPrimary(@PathVariable("carId") String carId,
                                             @PathVariable("imageId") Long imageId) {
           carImageService.setPrimary(carId, imageId);
           return ResponseEntity.ok().build();
@@ -43,7 +43,7 @@ public class CarImageController {
 
      @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isCarOwner(#carId)")
      @DeleteMapping("/{imageId}")
-     public ResponseEntity<Void> deleteImage(@PathVariable("carId") Long carId,
+     public ResponseEntity<Void> deleteImage(@PathVariable("carId") String carId,
                                              @PathVariable("imageId") Long imageId) {
           carImageService.delete(carId, imageId);
           return ResponseEntity.noContent().build();

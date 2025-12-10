@@ -11,6 +11,7 @@ import com.example.carrental.repository.BookingRepository;
 import com.example.carrental.repository.CarRepository;
 import com.example.carrental.repository.LocationRepository;
 import com.example.carrental.repository.UserRepository;
+import com.example.carrental.util.UniqueIdGenerator;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,17 +26,29 @@ import java.util.List;
 @Service
 public class BookingService {
 
+     private final UniqueIdGenerator idGenerator;
      private final BookingRepository bookingRepository;
      private final CarRepository carRepository;
      private final UserRepository userRepository;
      private final LocationRepository locationRepository;
 
      public BookingService(BookingRepository bookingRepository, CarRepository carRepository,
-                           UserRepository userRepository, LocationRepository locationRepository) {
+                           UserRepository userRepository, LocationRepository locationRepository, UniqueIdGenerator idGenerator) {
           this.bookingRepository = bookingRepository;
           this.carRepository = carRepository;
           this.userRepository = userRepository;
           this.locationRepository = locationRepository;
+          this.idGenerator = idGenerator;
+     }
+
+     private String generateUniqueBookingId() {
+          while (true) {
+               String id = idGenerator.generate("BKNG");
+               if (!bookingRepository.existsById(id)) {
+                    return id;
+               }
+               // Incredibly unlikely to enter retry loop
+          }
      }
 
      /**
@@ -91,6 +104,7 @@ public class BookingService {
           double totalPrice = pricePerDay * days;
 
           Booking booking = new Booking();
+          booking.setId(generateUniqueBookingId());
           booking.setCar(car);
           booking.setUser(user);
           booking.setPickupLocation(pickup);
@@ -109,7 +123,7 @@ public class BookingService {
       * Confirm a booking (e.g., after payment). Changes status to CONFIRMED if currently PENDING and no overlap exists.
       */
      @Transactional
-     public BookingResponse confirmBooking(Long bookingId) {
+     public BookingResponse confirmBooking(String bookingId) {
           Booking b = bookingRepository.findById(bookingId)
                   .orElseThrow(() -> new IllegalArgumentException("Booking not found: " + bookingId));
 
@@ -146,7 +160,7 @@ public class BookingService {
       * Cancel a booking.
       */
      @Transactional
-     public BookingResponse cancelBooking(Long bookingId, String reason) {
+     public BookingResponse cancelBooking(String bookingId, String reason) {
           Booking b = bookingRepository.findById(bookingId)
                   .orElseThrow(() -> new IllegalArgumentException("Booking not found: " + bookingId));
 

@@ -60,7 +60,7 @@ public class SecurityService {
      /**
       * True if current user is owner of the given car id.
       */
-     public boolean isCarOwner(Long carId) {
+     public boolean isCarOwner(String carId) {
           Long uid = currentUserId();
           if (uid == null || carId == null) return false;
           Optional<Car> c = carRepository.findById(carId);
@@ -71,7 +71,7 @@ public class SecurityService {
       * True if current user owns the booking (booking->user).
       * Useful if you want to restrict booking cancel/confirm to owner or admin.
       */
-     public boolean isBookingOwner(Long bookingId) {
+     public boolean isBookingOwner(String bookingId) {
           Long uid = currentUserId();
           if (uid == null || bookingId == null) return false;
           return bookingRepository.findById(bookingId).map(b -> b.getUser() != null && uid.equals(b.getUser().getId())).orElse(false);

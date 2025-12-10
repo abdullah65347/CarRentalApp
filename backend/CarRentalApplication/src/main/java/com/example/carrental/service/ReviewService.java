@@ -8,6 +8,7 @@ import com.example.carrental.repository.BookingRepository;
 import com.example.carrental.repository.CarRepository;
 import com.example.carrental.repository.ReviewRepository;
 import com.example.carrental.repository.UserRepository;
+import com.example.carrental.util.UniqueIdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +25,7 @@ public class ReviewService {
      @Autowired
      private  SecurityService securityService;
 
+     private final UniqueIdGenerator idGenerator;
      private final ReviewRepository reviewRepository;
      private final UserRepository userRepository;
      private final CarRepository carRepository;
@@ -32,18 +34,28 @@ public class ReviewService {
      public ReviewService(ReviewRepository reviewRepository,
                           UserRepository userRepository,
                           CarRepository carRepository,
-                          BookingRepository bookingRepository) {
+                          BookingRepository bookingRepository,UniqueIdGenerator idGenerator) {
           this.reviewRepository = reviewRepository;
           this.userRepository = userRepository;
           this.carRepository = carRepository;
           this.bookingRepository = bookingRepository;
+          this.idGenerator = idGenerator;
      }
 
+     private String generateUniqueBookingId() {
+          while (true) {
+               String id = idGenerator.generate("REVW");
+               if (!bookingRepository.existsById(id)) {
+                    return id;
+               }
+               // Incredibly unlikely to enter retry loop
+          }
+     }
      /**
       * Create a review. Ensures the authenticated user has at least one COMPLETED booking for this car.
       */
      @Transactional
-     public ReviewResponse createReview(Long carId, CreateReviewRequest req) {
+     public ReviewResponse createReview(String carId, CreateReviewRequest req) {
           // ensure car exists
           carRepository.findById(carId).orElseThrow(() -> new IllegalArgumentException("Car not found"));
 
@@ -62,6 +74,7 @@ public class ReviewService {
           }
 
           Review r = new Review();
+          r.setId(generateUniqueBookingId());
           r.setCar(carRepository.findById(carId).get());
           r.setUser(user);
           r.setRating(req.getRating());
@@ -71,13 +84,13 @@ public class ReviewService {
           return map(saved);
      }
 
-     public Page<ReviewResponse> listReviews(Long carId, Pageable pageable) {
+     public Page<ReviewResponse> listReviews(String carId, Pageable pageable) {
           return reviewRepository.findByCarIdOrderByCreatedAtDesc(carId, pageable)
                   .map(this::map);
      }
 
      @Transactional
-     public void deleteReview(Long reviewId) {
+     public void deleteReview(String reviewId) {
 
           Review r = reviewRepository.findById(reviewId)
                   .orElseThrow(() -> new IllegalArgumentException("Review not found"));

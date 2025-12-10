@@ -14,8 +14,8 @@ import java.util.List;
 @NoArgsConstructor
 public class Car {
      @Id
-     @GeneratedValue(strategy = GenerationType.IDENTITY)
-     private Long id;
+     @Column(name = "id", nullable = false, unique = true)
+     private String id;
 
      // optional owner (if implementing multi-owner listings later)
      @ManyToOne(fetch = FetchType.LAZY)
