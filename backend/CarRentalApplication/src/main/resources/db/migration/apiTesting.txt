@@ -1,0 +1,219 @@
+Great — below is a complete, organized list of all endpoints your backend exposes (based on the code you and I added) together with dummy request bodies and quick Postman/curl examples you can paste into Postman. For every protected endpoint remember to set the header:
+Authorization: Bearer <ACCESS_TOKEN>
+(Use the token returned by login.)
+
+cc{
+  "name": "Test User",
+  "email": "user@example.com",
+  "password": "password123",
+  "phone": "9876543210"
+}
+	• Expected: 201 Created
+Login
+	• Method: POST
+	• URL: /api/auth/login
+	• Body (JSON):
+{
+  "email": "user@example.com",
+  "password": "password123"
+}
+	• Response (example):
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "tokenType": "Bearer"
+}
+
+Users & Roles (admin)
+List all users (admin only)
+	• GET /api/admin/users
+	• Header: Authorization: Bearer <ADMIN_TOKEN>
+	• Response: array of user objects.
+Set user roles (admin only)
+	• PUT /api/admin/users/{id}/roles?roles=ROLE_USER,ROLE_OWNER
+	• Header: Authorization: Bearer <ADMIN_TOKEN>
+	• No body required. Returns 200 OK.
+
+Locations
+Create location
+	• POST /api/locations
+	• Body (JSON):
+{
+  "name": "Downtown Hub",
+  "address": "123 Main St",
+  "city": "Mumbai",
+  "state": "Maharashtra",
+  "country": "India",
+  "lat": 19.07,
+  "lng": 72.87
+}
+	• Response: created location object (contains id).
+List locations
+	• GET /api/locations or /api/locations?city=Mumbai
+Get location
+	• GET /api/locations/{id}
+
+Cars
+Create car (owner or admin)
+	• POST /api/cars
+	• Header: Authorization: Bearer <OWNER_OR_ADMIN_TOKEN>
+	• Body (JSON):
+{
+  "make": "Toyota",
+  "model": "Camry",
+  "year": 2022,
+  "plateNumber": "MH12AB1234",
+  "seats": 5,
+  "carType": "SEDAN",
+  "transmission": "AUTO",
+  "fuelType": "PETROL",
+  "pricePerDay": 2500.00,
+  "description": "Comfortable sedan",
+  "locationId": 1,
+  "status": "ACTIVE"
+}
+	• Response: created car DTO including id.
+Update car (owner or admin)
+	• PUT /api/cars/{id}
+	• Header: Authorization: Bearer <OWNER_OR_ADMIN_TOKEN>
+	• Body: same shape as create (only changed fields required).
+Get car (public)
+	• GET /api/cars/{id}
+List / search cars (public)
+	• GET /api/cars?page=0&size=10&city=Mumbai&minPrice=1000&maxPrice=5000&seats=4&carType=SEDAN
+	• Response: paginated list of car DTOs
+
+Car Images
+Upload image (owner or admin)
+	• POST /api/cars/{carId}/images
+	• Header: Authorization: Bearer <OWNER_OR_ADMIN_TOKEN>
+	• Body: form-data (multipart)
+		○ Key: file (type: File), select image file
+	• Postman: choose form-data, add file field and upload.
+	• Example curl:
+curl -X POST "http://localhost:8080/api/cars/1/images" \
+  -H "Authorization: Bearer <TOKEN>" \
+  -F "file=@/path/to/car1.jpg"
+	• Response: CarImage object with url and id.
+List images
+	• GET /api/cars/{carId}/images
+	• Response: array of image objects (primary flagged).
+Set primary image (owner or admin)
+	• PUT /api/cars/{carId}/images/{imageId}/primary
+	• Header: Authorization: Bearer <OWNER_OR_ADMIN_TOKEN>
+	• No body. Response: 200 OK.
+Delete image (owner or admin)
+	• DELETE /api/cars/{carId}/images/{imageId}
+	• Header: Authorization: Bearer <OWNER_OR_ADMIN_TOKEN>
+	• Response: 204 No Content
+Serve images
+	• Files are available under /uploads/<filename> (example: http://localhost:8080/uploads/car-1-...jpg)
+
+Availability (if used)
+(You implemented an availability entity but explicit endpoints are optional — if added earlier they follow this pattern.)
+Get availability for a car
+	• GET /api/cars/{carId}/availability?start=2025-12-01T00:00:00Z&end=2025-12-31T00:00:00Z
+Create availability slot (owner/admin)
+	• POST /api/cars/{carId}/availability
+	• Body example:
+{
+  "startDatetime": "2025-12-01T09:00:00Z",
+  "endDatetime": "2025-12-01T18:00:00Z",
+  "availableFlag": true
+}
+
+Bookings
+Create booking (authenticated user)
+	• POST /api/bookings
+	• Header: Authorization: Bearer <USER_TOKEN>
+	• Body (JSON):
+{
+  "carId": 1,
+  "pickupLocationId": 1,
+  "dropoffLocationId": 1,
+  "startDatetime": "2025-12-15T09:00:00Z",
+  "endDatetime": "2025-12-17T09:00:00Z"
+}
+	• Response (example):
+{
+  "id": 12,
+  "carId": 1,
+  "userId": 5,
+  "startDatetime": "2025-12-15T09:00:00Z",
+  "endDatetime": "2025-12-17T09:00:00Z",
+  "totalPrice": 5000.0,
+  "status": "PENDING"
+}
+Confirm booking (owner/admin or booking owner per RBAC)
+	• PUT /api/bookings/{id}/confirm
+	• Header: Authorization: Bearer <ADMIN_OR_OWNER_TOKEN>
+	• Response: updated booking (status CONFIRMED) or 409 Conflict if overlap.
+Cancel booking (owner/admin or booking owner)
+	• PUT /api/bookings/{id}/cancel?reason=change_of_plans
+	• Header: Authorization: Bearer <ADMIN_OR_OWNER_TOKEN>
+	• Response: updated booking (status CANCELLED)
+Get booking (owner/admin)
+	• GET /api/bookings/{id}
+	• Header: Authorization: Bearer <OWNER_OR_ADMIN_TOKEN>
+List bookings (user's bookings or admin)
+	• GET /api/bookings?status=CONFIRMED&page=0&size=10
+	• Header: Authorization: Bearer <TOKEN>
+	• Response: list or paginated bookings.
+
+Reviews
+Create review (authenticated user; service enforces user has a COMPLETED booking for this car)
+	• POST /api/cars/{carId}/reviews
+	• Header: Authorization: Bearer <USER_TOKEN>
+	• Body:
+{
+  "rating": 5,
+  "comment": "Great car, very clean and comfortable."
+}
+	• Response: created review DTO.
+List reviews for a car
+	• GET /api/cars/{carId}/reviews?page=0&size=10
+Delete review (review owner or admin)
+	• DELETE /api/reviews/{id}
+	• Header: Authorization: Bearer <TOKEN>
+	• Response: 204 No Content (service checks ownership/admin)
+
+Admin / Reporting (basic)
+Get bookings report (if implemented)
+	• GET /api/admin/bookings/report?from=2025-12-01&to=2025-12-31&groupBy=day
+	• Header: Authorization: Bearer <ADMIN_TOKEN>
+	• Response: aggregated stats (bookings per day, revenue)
+(If not implemented yet, use DB queries or add endpoints later.)
+
+Global error responses
+When validation or other errors occur, the API returns a structured error JSON. Example (validation error):
+{
+  "timestamp": "2025-12-08T12:00:00Z",
+  "status": 400,
+  "error": "Validation Failed",
+  "message": "Validation error",
+  "path": "/api/bookings",
+  "validationErrors": ["Start datetime must be before end datetime"]
+}
+Booking conflict example (HTTP 409):
+{
+  "timestamp": "2025-12-08T12:05:00Z",
+  "status": 409,
+  "error": "Conflict",
+  "message": "Car is already booked for the selected time range",
+  "path": "/api/bookings"
+}
+
+Quick Postman setup tips
+	1. Create an environment variable {{baseUrl}} set to http://localhost:8080.
+	2. Create a request to POST {{baseUrl}}/api/auth/login. After successful login, copy the returned accessToken into a variable {{token}}.
+		○ In Postman, automate this with a test script that sets pm.environment.set("token", pm.response.json().accessToken).
+	3. For protected requests, add a header:
+		○ Key: Authorization
+		○ Value: Bearer {{token}}
+	4. For file uploads use Body -> form-data and add file field (type File).
+	5. Use the dummy JSON bodies above for requests; edit IDs to match your seeded/generated IDs.
+
+If you want, I can now:
+	• generate a Postman collection (JSON) with all of the requests above populated (you can import into Postman directly),
+or
+	• create a single bash script using curl that runs through the full happy path (register → login → create location → create car → upload image → create booking → confirm booking → mark completed → create review).
+Which would you like next?
