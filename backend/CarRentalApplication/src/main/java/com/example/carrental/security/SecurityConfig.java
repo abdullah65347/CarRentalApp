@@ -12,6 +12,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.cors.CorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @EnableMethodSecurity
@@ -26,10 +31,12 @@ public class SecurityConfig {
      }
 
      @Bean
-     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+     public SecurityFilterChain filterChain(HttpSecurity http, CorsConfigurationSource corsConfigurationSource) throws Exception {
           var jwtFilter = new JwtAuthenticationFilter(jwtUtil, userDetailsService);
 
           http
+                  // use the provided CorsConfigurationSource explicitly (modern style)
+                  .cors(cors -> cors.configurationSource(corsConfigurationSource))
                   .csrf(csrf -> csrf.disable())
                   .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                   .authorizeHttpRequests(authorize -> authorize
@@ -39,6 +46,23 @@ public class SecurityConfig {
                   .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
           return http.build();
+     }
+
+     @Bean
+     public CorsConfigurationSource corsConfigurationSource() {
+          CorsConfiguration config = new CorsConfiguration();
+          // exact origin(s) — DO NOT use "*" when allowCredentials = true
+          config.setAllowedOrigins(List.of("http://localhost:5173"));
+          config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+          config.setAllowedHeaders(List.of("*"));
+          config.setAllowCredentials(true);
+          // optional: expose headers like Authorization if you need them on client
+          config.setExposedHeaders(List.of("Authorization", "Content-Disposition"));
+
+          UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+          // apply to API endpoints; you can use "/**" to cover all routes
+          source.registerCorsConfiguration("/api/**", config);
+          return source;
      }
 
      @Bean
