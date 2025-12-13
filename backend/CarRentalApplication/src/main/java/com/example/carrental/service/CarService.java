@@ -29,15 +29,18 @@ public class CarService {
      private final CarRepository carRepository;
      private final LocationRepository locationRepository;
      private final UserRepository userRepository;
+     private final SecurityService securityService;
+
      private final EntityManager em;
 
      public CarService(CarRepository carRepository, LocationRepository locationRepository,
-                       UserRepository userRepository, EntityManager em,UniqueIdGenerator idGenerator) {
+                       UserRepository userRepository, EntityManager em,UniqueIdGenerator idGenerator,SecurityService securityService) {
           this.carRepository = carRepository;
           this.locationRepository = locationRepository;
           this.userRepository = userRepository;
           this.em = em;
           this.idGenerator = idGenerator;
+          this.securityService = securityService;
      }
 
      private String generateUniqueCarId() {
@@ -77,6 +80,12 @@ public class CarService {
 
           Car saved = carRepository.save(car);
           return mapToResponse(saved);
+     }
+     // get car's by owner's id
+     public Page<CarResponse> getCarsByCurrentOwner(Pageable pageable) {
+          Long ownerId = securityService.currentUserId();
+          Page<Car> cars = carRepository.findByOwnerId(ownerId, pageable);
+          return cars.map(this::mapToResponse);
      }
 
      @Transactional

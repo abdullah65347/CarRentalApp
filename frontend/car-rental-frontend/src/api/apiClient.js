@@ -1,26 +1,40 @@
-import axios from 'axios'
+import axios from "axios";
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
 
 const api = axios.create({
     baseURL: API_BASE,
-    headers: { 'Content-Type': 'application/json' },
-})
+    headers: { "Content-Type": "application/json" }
+});
 
-// attach token from localStorage
-api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('access_token')
-    if (token) config.headers.Authorization = 'Bearer ' + token
-    return config
-})
+// Token attach
+api.interceptors.request.use(config => {
+    const token = localStorage.getItem("access_token");
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+    return config;
+});
 
-// global response interceptor
+// Error handling
 api.interceptors.response.use(
-    (res) => res,
-    (err) => {
-        // optional: handle 401 globally
-        return Promise.reject(err)
-    }
-)
+    (response) => response,
+    (error) => {
+        if (!error.response) {
+            return Promise.reject({ message: "Network error" });
+        }
 
-export default api
+        const { status, data } = error.response;
+
+        if (status === 401) {
+            localStorage.removeItem("access_token");
+            window.location.href = "/auth/login";
+        }
+
+        return Promise.reject({
+            status,
+            message: data?.message || "Something went wrong",
+            errors: data?.validationErrors || null,
+        });
+    }
+);
+
+export default api;

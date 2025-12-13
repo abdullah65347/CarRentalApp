@@ -29,7 +29,7 @@ public class BookingCleanupService {
      private final long pendingTtlMinutes;
 
      public BookingCleanupService(BookingRepository bookingRepository,
-                                  @Value("${app.booking.pending-ttl-minutes:30}") long pendingTtlMinutes) {
+                                  @Value("${app.booking.pending-ttl-minutes:1440}") long pendingTtlMinutes) {
           this.bookingRepository = bookingRepository;
           this.pendingTtlMinutes = pendingTtlMinutes;
      }

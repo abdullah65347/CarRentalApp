@@ -76,4 +76,5 @@ public class SecurityService {
           if (uid == null || bookingId == null) return false;
           return bookingRepository.findById(bookingId).map(b -> b.getUser() != null && uid.equals(b.getUser().getId())).orElse(false);
      }
+
 }

@@ -12,6 +12,7 @@ import com.example.carrental.repository.CarRepository;
 import com.example.carrental.repository.LocationRepository;
 import com.example.carrental.repository.UserRepository;
 import com.example.carrental.util.UniqueIdGenerator;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -31,14 +32,16 @@ public class BookingService {
      private final CarRepository carRepository;
      private final UserRepository userRepository;
      private final LocationRepository locationRepository;
+     private final SecurityService securityService;
 
      public BookingService(BookingRepository bookingRepository, CarRepository carRepository,
-                           UserRepository userRepository, LocationRepository locationRepository, UniqueIdGenerator idGenerator) {
+                           UserRepository userRepository, LocationRepository locationRepository, UniqueIdGenerator idGenerator, SecurityService securityService) {
           this.bookingRepository = bookingRepository;
           this.carRepository = carRepository;
           this.userRepository = userRepository;
           this.locationRepository = locationRepository;
           this.idGenerator = idGenerator;
+          this.securityService = securityService;
      }
 
      private String generateUniqueBookingId() {
@@ -156,10 +159,24 @@ public class BookingService {
           return mapToResponse(saved);
      }
 
+     // Get all user based booking's
+     public List<BookingResponse> getMyBookings() {
+          Long userId = securityService.currentUserId();
+          if (userId == null) {
+               throw new IllegalStateException("User not authenticated");
+          }
+
+          return bookingRepository.findByUserId(userId)
+                  .stream()
+                  .map(this::mapToResponse)
+                  .toList();
+     }
+
      /**
       * Cancel a booking.
       */
      @Transactional
+     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isBookingOwner(#id)")
      public BookingResponse cancelBooking(String bookingId, String reason) {
           Booking b = bookingRepository.findById(bookingId)
                   .orElseThrow(() -> new IllegalArgumentException("Booking not found: " + bookingId));

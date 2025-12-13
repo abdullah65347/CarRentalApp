@@ -1,25 +1,57 @@
 import React, { useEffect, useState } from 'react'
 import api from '../api/apiClient'
-import { Link } from 'react-router-dom'
+import CarCard from '../components/car/carCard'
+import { ENDPOINTS } from '../api/endpoints'
+import PaginatedList from '../components/ui/PaginatedList'
 
 export default function ListingsPage() {
     const [cars, setCars] = useState([])
+    const [loading, setLoading] = useState(true)
+
+    const [page, setPage] = useState(0)
+    const [totalPages, setTotalPages] = useState(0)
 
     useEffect(() => {
-        api.get('/cars').then(res => setCars(res.data)).catch(() => setCars([]))
-    }, [])
+        loadCars(page)
+    }, [page])
+
+    async function loadCars(pageNumber) {
+        try {
+            setLoading(true)
+            const res = await api.get(
+                `${ENDPOINTS.CARS.LIST}?page=${pageNumber}&size=9`
+            )
+
+            setCars(res.data.content)
+            setTotalPages(res.data.totalPages)
+        } catch (err) {
+            console.log("ERROR:", err)
+        } finally {
+            setLoading(false)
+        }
+    }
 
     return (
-        <div>
-            <h1 className="text-2xl font-bold mb-4">Cars</h1>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {cars.map(c => (
-                    <Link to={`/cars/${c.id}`} key={c.id} className="block p-4 bg-white rounded shadow">
-                        <div className="font-semibold">{c.make} {c.model}</div>
-                        <div className="text-sm text-gray-600">₹{c.pricePerDay} / day</div>
-                    </Link>
-                ))}
-            </div>
+        <div className="max-w-7xl mx-auto px-4 py-8">
+            <h1 className="text-2xl font-bold mb-6">Available Cars</h1>
+
+            {loading && <p>Loading cars...</p>}
+
+            {!loading && cars.length === 0 && (
+                <p>No cars available.</p>
+            )}
+
+            {!loading && cars.length > 0 && (
+                <PaginatedList
+                    data={cars}
+                    page={page}
+                    totalPages={totalPages}
+                    onPageChange={setPage}
+                    renderItem={(car) => (
+                        <CarCard key={car.id} car={car} />
+                    )}
+                />
+            )}
         </div>
     )
 }

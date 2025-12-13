@@ -24,4 +24,6 @@ public interface BookingRepository extends JpaRepository<Booking, String> {
 
      // optional: list bookings for a user with paging
      List<Booking> findByUserIdOrderByStartDatetimeDesc(Long userId, Pageable pageable);
+
+     List<Booking> findByUserId(Long userId);
 }

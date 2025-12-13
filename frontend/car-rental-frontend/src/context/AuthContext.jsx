@@ -1,39 +1,40 @@
-import React, { createContext, useState, useEffect } from 'react'
-import api from '../api/apiClient'
+import React, { createContext, useState, useEffect } from "react";
+import api from "../api/apiClient";
+import { ENDPOINTS } from "../api/endpoints";
 
+export const AuthContext = createContext(null);
 
-export const AuthContext = createContext()
-
-
-export function AuthProvider({ children }) {
-    const [user, setUser] = useState(null)
-    const [token, setToken] = useState(localStorage.getItem('access_token') || null)
-
+function AuthProvider({ children }) {
+    const [user, setUser] = useState(null);
+    const [token, setToken] = useState(localStorage.getItem("access_token") || null);
 
     useEffect(() => {
-        if (token) {
-            // optional: fetch profile
-            api.get('/auth/me').then(res => setUser(res.data)).catch(() => { setUser(null) })
+        if (!token) {
+            setUser(null);
+            return;
         }
-    }, [token])
 
+        api.get(ENDPOINTS.AUTH.ME)
+            .then(res => setUser(res.data))
+            .catch(() => setUser(null));
+    }, [token]);
 
-    function login(tokenValue) {
-        localStorage.setItem('access_token', tokenValue)
-        setToken(tokenValue)
-    }
+    const login = (tokenValue) => {
+        localStorage.setItem("access_token", tokenValue);
+        setToken(tokenValue);
+    };
 
-
-    function logout() {
-        localStorage.removeItem('access_token')
-        setToken(null)
-        setUser(null)
-    }
-
+    const logout = () => {
+        localStorage.removeItem("access_token");
+        setToken(null);
+        setUser(null);
+    };
 
     return (
         <AuthContext.Provider value={{ user, setUser, token, login, logout }}>
             {children}
         </AuthContext.Provider>
-    )
+    );
 }
+
+export default AuthProvider;
