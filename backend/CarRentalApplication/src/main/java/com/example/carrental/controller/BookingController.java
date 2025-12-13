@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * Booking endpoints:
  *  - POST /api/bookings         -> create (PENDING)
@@ -24,24 +26,31 @@ public class BookingController {
 
      public BookingController(BookingService bookingService) { this.bookingService = bookingService; }
 
+     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
      @PostMapping
      public ResponseEntity<BookingResponse> createBooking(@Valid @RequestBody CreateBookingRequest req) {
           BookingResponse resp = bookingService.createBooking(req);
           return ResponseEntity.status(201).body(resp);
      }
 
-     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isBookingOwner(#id)")
+     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_OWNER')")
      @PutMapping("/{id}/confirm")
      public ResponseEntity<BookingResponse> confirmBooking(@PathVariable("id") String id) {
           BookingResponse resp = bookingService.confirmBooking(id);
           return ResponseEntity.ok(resp);
      }
 
-     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isBookingOwner(#id)")
+     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_OWNER') or hasRole('ROLE_USER')")
      @PutMapping("/{id}/cancel")
      public ResponseEntity<BookingResponse> cancelBooking(@PathVariable("id") String id,
                                                           @RequestParam(value = "reason", required = false) String reason) {
           BookingResponse resp = bookingService.cancelBooking(id, reason);
           return ResponseEntity.ok(resp);
      }
+
+     @GetMapping("/my")
+     public ResponseEntity<List<BookingResponse>> getMyBookings() {
+          return ResponseEntity.ok(bookingService.getMyBookings());
+     }
+
 }

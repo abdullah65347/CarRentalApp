@@ -1,0 +1,11 @@
+.input {
+    @apply w-full border rounded p-2;
+}
+
+.label {
+    @apply text-sm text-gray-600 mb-1 block;
+}
+
+.section-title {
+    @apply text-xl font-semibold mb-4;
+}

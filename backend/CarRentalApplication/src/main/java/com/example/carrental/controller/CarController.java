@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/cars")
 public class CarController {
@@ -28,11 +30,23 @@ public class CarController {
      }
 
      // Owners (of the car) or admins can update a car
-     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isCarOwner(#id)")
+     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_OWNER')")
      @PutMapping("/{id}")
      public ResponseEntity<CarResponse> updateCar(@PathVariable("id") String id, @Valid @RequestBody CreateCarRequest req) {
           CarResponse resp = carService.updateCar(id, req);
           return ResponseEntity.ok(resp);
+     }
+
+     @PreAuthorize("hasRole('ROLE_OWNER')")
+     @GetMapping("/my")
+     public ResponseEntity<Page<CarResponse>> listMyCars(
+             @RequestParam(value = "page", defaultValue = "0") int page,
+             @RequestParam(value = "size", defaultValue = "10") int size
+     ) {
+          Pageable pageable = PageRequest.of(page, size);
+          Page<CarResponse> cars = carService.getCarsByCurrentOwner(pageable);
+
+          return ResponseEntity.ok(cars);
      }
 
      @GetMapping("/{id}")
