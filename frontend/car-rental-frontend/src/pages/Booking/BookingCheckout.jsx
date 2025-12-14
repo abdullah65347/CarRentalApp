@@ -1,27 +1,40 @@
 import { useState } from "react";
 import api from "../../api/apiClient";
 import { ENDPOINTS } from "../../api/endpoints";
-import { useToast } from "../../context/ToastContext";
 import { validateBooking } from "../../utils/validators";
-import Card from "../../components/ui/Card";
-import DateRangePicker from "../../components/booking/DateRangePicker";
+
 import BookingSummary from "../../components/booking/BookingSummary";
 import Button from "../../components/ui/Button";
+import DateHeader from "../../components/booking/DateHeader";
+import DateRangePicker from "../../components/booking/DateRangePicker";
+import LocationPicker from "../../components/LocationPicker";
+import { useToast } from "../../context/ToastContext";
 
 export default function BookingCheckout({ car, locations }) {
     const toast = useToast();
 
+    /* -------------------- STATE -------------------- */
     const [pickupLocationId, setPickupLocationId] = useState("");
     const [dropoffLocationId, setDropoffLocationId] = useState("");
+
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
+
+    // null | "PICKUP" | "RETURN"
+    const [openPicker, setOpenPicker] = useState(null);
+
     const [loading, setLoading] = useState(false);
 
+    /* -------------------- HELPERS -------------------- */
     function toOffsetDateTime(value) {
         if (!value) return null;
-        return new Date(value).toISOString(); // OffsetDateTime compatible
+        return new Date(value).toISOString();
     }
 
+    const pickupLocation = locations.find(l => l.id === pickupLocationId);
+    const dropoffLocation = locations.find(l => l.id === dropoffLocationId);
+
+    /* -------------------- BOOKING -------------------- */
     async function confirmBooking() {
         const error = validateBooking({
             pickupLocationId,
@@ -54,52 +67,48 @@ export default function BookingCheckout({ car, locations }) {
         }
     }
 
-    const pickupLocation = locations.find(l => l.id === pickupLocationId);
-    const dropoffLocation = locations.find(l => l.id === dropoffLocationId);
-
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* LEFT */}
-            <div className="md:col-span-2 space-y-4">
-                <Card>
-                    <h3 className="section-title">Select Locations</h3>
+            {/* ================= LEFT ================= */}
+            <div className="md:col-span-2 space-y-6">
+                {/* LOCATION PICKER */}
+                <LocationPicker
+                    pickupLocationId={pickupLocationId}
+                    dropoffLocationId={dropoffLocationId}
+                    locations={locations}
+                    onPickupChange={setPickupLocationId}
+                    onDropoffChange={setDropoffLocationId}
+                />
 
-                    <label className="label">Pickup Location</label>
-                    <select
-                        value={pickupLocationId}
-                        onChange={(e) => setPickupLocationId(e.target.value)}
-                        className="input mb-3"
-                    >
-                        <option value="">Select pickup</option>
-                        {locations.map(loc => (
-                            <option key={loc.id} value={loc.id}>{loc.name}</option>
-                        ))}
-                    </select>
+                {/* DATE HEADER */}
+                <DateHeader
+                    pickupDate={startDate}
+                    returnDate={endDate}
+                    onOpen={setOpenPicker}
+                />
 
-                    <label className="label">Dropoff Location</label>
-                    <select
-                        value={dropoffLocationId}
-                        onChange={(e) => setDropoffLocationId(e.target.value)}
-                        className="input"
-                    >
-                        <option value="">Select dropoff</option>
-                        {locations.map(loc => (
-                            <option key={loc.id} value={loc.id}>{loc.name}</option>
-                        ))}
-                    </select>
-                </Card>
-
-                <Card>
+                {/* DATE PICKER */}
+                {openPicker && (
                     <DateRangePicker
-                        startDate={startDate}
-                        endDate={endDate}
-                        onStartChange={setStartDate}
-                        onEndChange={setEndDate}
+                        title={openPicker === "PICKUP" ? "Pick-up date" : "Return date"}
+                        value={openPicker === "PICKUP" ? startDate : endDate}
+                        minDate={openPicker === "RETURN" ? startDate : null}
+                        onSave={(val) => {
+                            if (openPicker === "PICKUP") {
+                                setStartDate(val);
+                                setOpenPicker("RETURN");
+                            } else {
+                                setEndDate(val);
+                                setOpenPicker(null);
+                            }
+                        }}
+                        onClose={() => setOpenPicker(null)}
                     />
-                </Card>
+
+                )}
             </div>
 
-            {/* RIGHT */}
+            {/* ================= RIGHT ================= */}
             <div className="space-y-4">
                 <BookingSummary
                     car={car}
@@ -110,10 +119,7 @@ export default function BookingCheckout({ car, locations }) {
                     totalPrice={car.pricePerDay}
                 />
 
-                <Button
-                    loading={loading}
-                    onClick={confirmBooking}
-                >
+                <Button loading={loading} onClick={confirmBooking}>
                     Confirm Booking
                 </Button>
             </div>

@@ -8,6 +8,15 @@ export default function Header() {
 
     const roles = user?.roles || [];
 
+    function initials(name = "") {
+        return name
+            .split(" ")
+            .map(w => w[0])
+            .join("")
+            .toUpperCase()
+            .slice(0, 2);
+    }
+
     const isAdmin = roles.includes("ROLE_ADMIN");
     const isOwner = roles.includes("ROLE_OWNER");
     const isUser = roles.includes("ROLE_USER"); // NEW
@@ -63,16 +72,9 @@ export default function Header() {
                     {/* AUTH ACTIONS */}
                     {user ? (
                         <div className="flex items-center gap-3 ml-4">
-                            <Link
-                                to="/profile"
-                                className="text-sm font-medium text-gray-600 hover:text-blue-600"
-                            >
-                                {user.name}
+                            <Link to="/profile" className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center font-semibold text-gray-700">
+                                {initials(user.name)}
                             </Link>
-
-                            <Button variant="secondary" onClick={logout}>
-                                Logout
-                            </Button>
                         </div>
                     ) : (
                         <div className="flex items-center gap-2 ml-4">

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../api/apiClient";
 import { ENDPOINTS } from "../api/endpoints";
+import AddCar from "../components/car/AddCar";
 
 export default function CarDetailPage() {
     const { id } = useParams();
@@ -32,7 +33,6 @@ export default function CarDetailPage() {
 
     return (
         <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
-
             {/* LEFT: Car Information */}
             <div className="md:col-span-2 bg-white p-4 rounded shadow">
                 <h2 className="text-2xl font-bold">

@@ -2,13 +2,11 @@ import { useEffect, useState } from "react";
 import api from "../../api/apiClient";
 import { ENDPOINTS } from "../../api/endpoints";
 import Modal from "../../components/ui/Modal";
-import Button from "../../components/ui/Button";
 import { validateCar } from "../../utils/validators";
 import { useToast } from "../../context/ToastContext";
 
-
 export default function ManageCar({ car, onClose, onSaved }) {
-    const toast = useToast();
+    const { show } = useToast();
 
     const [form, setForm] = useState(car);
     const [saving, setSaving] = useState(false);
@@ -24,57 +22,87 @@ export default function ManageCar({ car, onClose, onSaved }) {
     async function saveCar() {
         const error = validateCar(form);
         if (error) {
-            toast.show(error);
+            show(error, "error");
             return;
         }
 
         try {
             setSaving(true);
             await api.put(ENDPOINTS.CARS.BY_ID(car.id), form);
-            toast.show("Car updated successfully");
-            onClose();
+            show("Car updated successfully", "success");
             onSaved();
+            onClose();
         } catch {
-            toast.show("Failed to update car");
+            show("Failed to update car", "error");
         } finally {
             setSaving(false);
         }
     }
 
     return (
-        <Modal open title="Manage Car" onClose={onClose}>
-            <div className="space-y-3">
-                <div>
-                    <label className="label">Price Per Day</label>
-                    <input
-                        type="number"
-                        value={form.pricePerDay}
-                        onChange={e => updateField("pricePerDay", e.target.value)}
-                        className="input"
-                    />
+        <Modal
+            open={!!car}
+            title="Manage Car"
+            onClose={onClose}
+            onConfirm={saveCar}
+            confirmText="Save Changes"
+            cancelText="Cancel"
+            loading={saving}
+        >
+            <div className="space-y-6">
+
+                {/* INFO */}
+                <div className="text-sm text-gray-600 bg-gray-50 p-4 rounded-lg">
+                    Update car pricing and availability.
+                    <div className="mt-1 font-medium text-gray-800">
+                        {car?.make} {car?.model} ({car?.plateNumber})
+                    </div>
                 </div>
 
-                <div>
-                    <label className="label">Status</label>
-                    <select
-                        value={form.status}
-                        onChange={e => updateField("status", e.target.value)}
-                        className="input"
-                    >
-                        <option value="ACTIVE">ACTIVE</option>
-                        <option value="INACTIVE">INACTIVE</option>
-                    </select>
-                </div>
+                {/* FORM */}
+                <div className="space-y-4">
 
-                <div className="flex justify-end gap-2 pt-3">
-                    <Button variant="secondary" onClick={onClose}>
-                        Cancel
-                    </Button>
-                    <Button loading={saving} onClick={saveCar}>
-                        Save
-                    </Button>
+                    {/* PRICE */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Price per day
+                        </label>
+                        <input
+                            type="number"
+                            value={form?.pricePerDay ?? ""}
+                            onChange={e =>
+                                updateField("pricePerDay", e.target.value)
+                            }
+                            className="input"
+                            placeholder="Enter price per day"
+                        />
+                    </div>
+
+                    {/* STATUS */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Status
+                        </label>
+                        <select
+                            value={form?.status ?? "ACTIVE"}
+                            onChange={e =>
+                                updateField("status", e.target.value)
+                            }
+                            className="input"
+                        >
+                            <option value="ACTIVE">Active (Available)</option>
+                            <option value="INACTIVE">Inactive (Hidden)</option>
+                        </select>
+
+                        <p className="mt-1 text-xs text-gray-500">
+                            {form?.status === "ACTIVE"
+                                ? "Car will be visible for booking"
+                                : "Car will be hidden from users"}
+                        </p>
+                    </div>
                 </div>
             </div>
         </Modal>
     );
+
 }
