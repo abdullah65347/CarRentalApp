@@ -13,10 +13,10 @@ export default function HomePage() {
     useEffect(() => {
         async function loadFeaturedCars() {
             try {
-                const res = await api.get(ENDPOINTS.CARS.LIST + "?size=3");
-                setCars(res.data.content || []);
+                const res = await api.get(ENDPOINTS.CARS.LIST);
+                setCars((res.data || []).slice(0, 3));
             } catch {
-                setCars([]);
+                setCars((res.data || []).slice(0, 3));
             } finally {
                 setLoading(false);
             }

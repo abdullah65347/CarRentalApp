@@ -15,6 +15,7 @@ export function validateBooking({
 
     return null;
 }
+
 export function validateCar(car) {
     if (!car.make) return "Make is required";
     if (!car.model) return "Model is required";
