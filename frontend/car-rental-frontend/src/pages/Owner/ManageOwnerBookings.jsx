@@ -1,12 +1,12 @@
 import { useState } from "react";
 import api from "../../api/apiClient";
 import { ENDPOINTS } from "../../api/endpoints";
-import BookingCard from "../../components/booking/BookingCard";
 import Button from "../../components/ui/Button";
 import Modal from "../../components/ui/Modal";
 import { useToast } from "../../context/ToastContext";
+import BookingCard from "../../components/booking/BookingCard";
 
-export default function ManageAllBookings({ bookings, reload }) {
+export default function ManageOwnerBookings({ bookings, reload }) {
     const { show } = useToast();
 
     const [selectedBooking, setSelectedBooking] = useState(null);
@@ -41,7 +41,7 @@ export default function ManageAllBookings({ bookings, reload }) {
     if (!bookings || bookings.length === 0) {
         return (
             <div className="text-gray-500 text-center py-10">
-                No bookings found
+                No bookings found for your cars
             </div>
         );
     }
@@ -71,7 +71,7 @@ export default function ManageAllBookings({ bookings, reload }) {
                 ))}
             </div>
 
-            {/* CONFIRM MODAL */}
+            {/* CONFIRM CANCEL MODAL */}
             <Modal
                 open={!!selectedBooking}
                 title="Cancel Booking"
@@ -83,18 +83,21 @@ export default function ManageAllBookings({ bookings, reload }) {
                 loading={loading}
             >
                 <div className="space-y-2 text-sm text-gray-700">
-                    <p>Are you sure you want to cancel this booking?</p>
+                    <p>
+                        Are you sure you want to cancel this booking?
+                    </p>
 
                     <div className="bg-gray-50 rounded-lg p-3 text-xs">
                         <div className="font-medium text-gray-900">
                             {selectedBooking?.car?.make}{" "}
                             {selectedBooking?.car?.model}
                         </div>
-                        <div>Booking ID: {selectedBooking?.id}</div>
-                        <div>User: {selectedBooking?.user?.name}</div>
-                    </div>
-                    <div>
-                        <input type="text" placeholder="Give reason for cancellation..." />
+                        <div>
+                            Booking ID: {selectedBooking?.id}
+                        </div>
+                        <div>
+                            User: {selectedBooking?.user?.name}
+                        </div>
                     </div>
 
                     <p className="text-xs text-red-600">

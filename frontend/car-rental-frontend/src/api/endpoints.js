@@ -21,6 +21,7 @@ export const ENDPOINTS = {
         ALL: "/bookings",
         CREATE: "/bookings",
         MY: "/bookings/my",
+        OWNER: "/bookings/owner",
         CONFIRM: (id) => `/bookings/${id}/confirm`,
         CANCEL: (id) => `/bookings/${id}/cancel`,
     },
