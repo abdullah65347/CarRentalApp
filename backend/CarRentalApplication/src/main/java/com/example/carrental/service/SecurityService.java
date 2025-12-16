@@ -56,7 +56,6 @@ public class SecurityService {
           return current != null && current.equals(reviewUserId);
      }
 
-
      /**
       * True if current user is owner of the given car id.
       */
@@ -76,5 +75,14 @@ public class SecurityService {
           if (uid == null || bookingId == null) return false;
           return bookingRepository.findById(bookingId).map(b -> b.getUser() != null && uid.equals(b.getUser().getId())).orElse(false);
      }
+
+     public boolean hasRole(String role) {
+          return SecurityContextHolder.getContext()
+                  .getAuthentication()
+                  .getAuthorities()
+                  .stream()
+                  .anyMatch(a -> a.getAuthority().equals(role));
+     }
+
 
 }

@@ -26,6 +26,7 @@ public class BookingController {
 
      public BookingController(BookingService bookingService) { this.bookingService = bookingService; }
 
+     /* Add bookings (ADMIN & USER only) */
      @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER')")
      @PostMapping
      public ResponseEntity<BookingResponse> createBooking(@Valid @RequestBody CreateBookingRequest req) {
@@ -33,6 +34,7 @@ public class BookingController {
           return ResponseEntity.status(201).body(resp);
      }
 
+     /* Get all bookings (ADMIN & OWNER only)   */
      @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_OWNER')")
      @PutMapping("/{id}/confirm")
      public ResponseEntity<BookingResponse> confirmBooking(@PathVariable("id") String id) {
@@ -40,17 +42,34 @@ public class BookingController {
           return ResponseEntity.ok(resp);
      }
 
+     /* Cancel bookings (ADMIN & OWNER & USER)   */
      @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_OWNER') or hasRole('ROLE_USER')")
      @PutMapping("/{id}/cancel")
      public ResponseEntity<BookingResponse> cancelBooking(@PathVariable("id") String id,
-                                                          @RequestParam(value = "reason", required = false) String reason) {
+                                                          @RequestParam(value = "reason", required = true) String reason) {
           BookingResponse resp = bookingService.cancelBooking(id, reason);
           return ResponseEntity.ok(resp);
      }
 
+     /* Get all user bookings (user only) */
+     @PreAuthorize("hasRole('ROLE_USER')")
      @GetMapping("/my")
      public ResponseEntity<List<BookingResponse>> getMyBookings() {
           return ResponseEntity.ok(bookingService.getMyBookings());
+     }
+
+     /* Get bookings for OWNER's cars */
+     @PreAuthorize("hasRole('ROLE_OWNER')")
+     @GetMapping("/owner")
+     public ResponseEntity<List<BookingResponse>> getOwnerBookings() {
+          return ResponseEntity.ok(bookingService.getOwnerBookings());
+     }
+
+     /* Get all bookings (ADMIN only) */
+     @GetMapping
+     @PreAuthorize("hasRole('ROLE_ADMIN')")
+     public ResponseEntity<List<BookingResponse>> getAllBookings() {
+          return ResponseEntity.ok(bookingService.getAllBookings());
      }
 
 }

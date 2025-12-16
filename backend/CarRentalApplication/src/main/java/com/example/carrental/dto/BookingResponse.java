@@ -10,10 +10,10 @@ import java.time.OffsetDateTime;
 @Setter
 public class BookingResponse {
      private String id;
-     private String carId;
-     private Long userId;
      private OffsetDateTime startDatetime;
      private OffsetDateTime endDatetime;
      private Double totalPrice;
      private String status;
+     private CarSummaryDto car;
+     private UserSummaryDto user;
 }

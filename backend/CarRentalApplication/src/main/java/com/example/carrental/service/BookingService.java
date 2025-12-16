@@ -1,8 +1,13 @@
 package com.example.carrental.service;
 
 import com.example.carrental.dto.BookingResponse;
+import com.example.carrental.dto.CarSummaryDto;
 import com.example.carrental.dto.CreateBookingRequest;
+import com.example.carrental.dto.UserSummaryDto;
+import com.example.carrental.exception.BadRequestException;
 import com.example.carrental.exception.BookingConflictException;
+import com.example.carrental.exception.ForbiddenException;
+import com.example.carrental.exception.ResourceNotFoundException;
 import com.example.carrental.model.Booking;
 import com.example.carrental.model.Car;
 import com.example.carrental.model.Location;
@@ -23,6 +28,7 @@ import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class BookingService {
@@ -44,6 +50,7 @@ public class BookingService {
           this.securityService = securityService;
      }
 
+     /* Auto booking id generation(BKNG-(XXXXXXXXXXX)   */
      private String generateUniqueBookingId() {
           while (true) {
                String id = idGenerator.generate("BKNG");
@@ -55,33 +62,32 @@ public class BookingService {
      }
 
      /**
-      * Create a booking transactionally. Uses pessimistic lock on the car row (if supported by JPA provider / DB)
-      * to reduce double-booking risk.
+      * Create a booking transactionally.
       */
      @Transactional
      public BookingResponse createBooking(CreateBookingRequest req) {
           if (req.getStartDatetime() == null || req.getEndDatetime() == null) {
-               throw new IllegalArgumentException("Start and end datetime must be provided");
+               throw new BadRequestException("Start and end datetime must be provided");
           }
           if (!req.getStartDatetime().isBefore(req.getEndDatetime())) {
-               throw new IllegalArgumentException("Start datetime must be before end datetime");
+               throw new BadRequestException("Start datetime must be before end datetime");
           }
 
           // Acquire lock on car row (uses CarRepository.findByIdForUpdate if available)
           Car car;
           try {
                car = carRepository.findByIdForUpdate(req.getCarId())
-                       .orElseThrow(() -> new IllegalArgumentException("Car not found with id: " + req.getCarId()));
+                       .orElseThrow(() -> new ResourceNotFoundException("Car not found with id: " + req.getCarId()));
           } catch (NoSuchMethodError | UnsupportedOperationException ex) {
                // fallback if repository doesn't support findByIdForUpdate
                car = carRepository.findById(req.getCarId())
-                       .orElseThrow(() -> new IllegalArgumentException("Car not found with id: " + req.getCarId()));
+                       .orElseThrow(() -> new ResourceNotFoundException("Car not found with id: " + req.getCarId()));
           }
 
           Location pickup = locationRepository.findById(req.getPickupLocationId())
-                  .orElseThrow(() -> new IllegalArgumentException("Pickup location not found"));
+                  .orElseThrow(() -> new ResourceNotFoundException("Pickup location not found"));
           Location dropoff = locationRepository.findById(req.getDropoffLocationId())
-                  .orElseThrow(() -> new IllegalArgumentException("Dropoff location not found"));
+                  .orElseThrow(() -> new ResourceNotFoundException("Dropoff location not found"));
 
           // Check overlap while holding lock
           List<String> blockingStatuses = Arrays.asList("CONFIRMED", "PENDING");
@@ -93,11 +99,11 @@ public class BookingService {
           // get current user from security context (assumes username = email)
           Authentication auth = SecurityContextHolder.getContext().getAuthentication();
           if (auth == null || !(auth.getPrincipal() instanceof UserDetails)) {
-               throw new IllegalStateException("Unable to determine authenticated user");
+               throw new ForbiddenException("Unable to determine authenticated user");
           }
           String email = ((UserDetails) auth.getPrincipal()).getUsername();
           User user = userRepository.findByEmail(email)
-                  .orElseThrow(() -> new IllegalStateException("Authenticated user not found in DB"));
+                  .orElseThrow(() -> new ForbiddenException("Authenticated user not found in DB"));
 
           // calculate total price (simple day-based calculation)
           long hours = Duration.between(req.getStartDatetime(), req.getEndDatetime()).toHours();
@@ -128,23 +134,23 @@ public class BookingService {
      @Transactional
      public BookingResponse confirmBooking(String bookingId) {
           Booking b = bookingRepository.findById(bookingId)
-                  .orElseThrow(() -> new IllegalArgumentException("Booking not found: " + bookingId));
+                  .orElseThrow(() -> new ResourceNotFoundException("Booking not found: " + bookingId));
 
           if ("CONFIRMED".equalsIgnoreCase(b.getStatus())) {
                return mapToResponse(b);
           }
           if ("CANCELLED".equalsIgnoreCase(b.getStatus())) {
-               throw new IllegalStateException("Cannot confirm a cancelled booking");
+               throw new BadRequestException("Cannot confirm a cancelled booking");
           }
 
           // lock car row before confirming
           Car car;
           try {
                car = carRepository.findByIdForUpdate(b.getCar().getId())
-                       .orElseThrow(() -> new IllegalStateException("Car not found"));
+                       .orElseThrow(() -> new ResourceNotFoundException("Car not found"));
           } catch (NoSuchMethodError | UnsupportedOperationException ex) {
                car = carRepository.findById(b.getCar().getId())
-                       .orElseThrow(() -> new IllegalStateException("Car not found"));
+                       .orElseThrow(() -> new ResourceNotFoundException("Car not found"));
           }
 
           // ensure no overlapping confirmed bookings (excluding current booking)
@@ -163,10 +169,28 @@ public class BookingService {
      public List<BookingResponse> getMyBookings() {
           Long userId = securityService.currentUserId();
           if (userId == null) {
-               throw new IllegalStateException("User not authenticated");
+               throw new ForbiddenException("User not authenticated");
           }
+          List<Booking> bookings = bookingRepository.findByUserId(userId);
+          return bookings.stream()
+                  .map(this::mapToResponse)
+                  .collect(Collectors.toList());
+     }
 
-          return bookingRepository.findByUserId(userId)
+     // Get all owner car's booking's
+     public List<BookingResponse> getOwnerBookings() {
+          Long ownerId = securityService.currentUserId();
+          List<Booking> bookings = bookingRepository.findByCarOwnerId(ownerId);
+
+          return bookings.stream()
+                  .map(this::mapToResponse)
+                  .collect(Collectors.toList());
+     }
+
+     /* Get all bookings (ADMIN only)  */
+     @Transactional(readOnly = true)
+     public List<BookingResponse> getAllBookings() {
+          return bookingRepository.findAll()
                   .stream()
                   .map(this::mapToResponse)
                   .toList();
@@ -176,10 +200,10 @@ public class BookingService {
       * Cancel a booking.
       */
      @Transactional
-     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isBookingOwner(#id)")
+     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER') or hasRole('ROLE_OWNER')")
      public BookingResponse cancelBooking(String bookingId, String reason) {
           Booking b = bookingRepository.findById(bookingId)
-                  .orElseThrow(() -> new IllegalArgumentException("Booking not found: " + bookingId));
+                  .orElseThrow(() -> new ResourceNotFoundException("Booking not found: " + bookingId));
 
           if ("CANCELLED".equalsIgnoreCase(b.getStatus())) {
                return mapToResponse(b);
@@ -191,15 +215,45 @@ public class BookingService {
           return mapToResponse(saved);
      }
 
-     private BookingResponse mapToResponse(Booking saved) {
+     private BookingResponse mapToResponse(Booking booking) {
+
           BookingResponse resp = new BookingResponse();
-          resp.setId(saved.getId());
-          resp.setCarId(saved.getCar() != null ? saved.getCar().getId() : null);
-          resp.setUserId(saved.getUser() != null ? saved.getUser().getId() : null);
-          resp.setStartDatetime(saved.getStartDatetime());
-          resp.setEndDatetime(saved.getEndDatetime());
-          resp.setTotalPrice(saved.getTotalPrice());
-          resp.setStatus(saved.getStatus());
+          resp.setId(booking.getId());
+          resp.setStartDatetime(booking.getStartDatetime());
+          resp.setEndDatetime(booking.getEndDatetime());
+          resp.setTotalPrice(booking.getTotalPrice());
+          resp.setStatus(booking.getStatus());
+
+          boolean isAdmin = securityService.hasRole("ROLE_ADMIN");
+          boolean isOwner = securityService.hasRole("ROLE_OWNER");
+
+          // USER INFO (role-based)
+          if (booking.getUser() != null && (isAdmin || isOwner)) {
+               UserSummaryDto userDto = new UserSummaryDto();
+
+               if (isAdmin) {
+                    userDto.setId(booking.getUser().getId());
+                    userDto.setEmail(booking.getUser().getEmail());
+               }
+
+               if (isAdmin || isOwner) {
+                    userDto.setName(booking.getUser().getName());
+               }
+
+               resp.setUser(userDto);
+          }
+
+          // CAR INFO (same for OWNER & ADMIN)
+          if (booking.getCar() != null) {
+               CarSummaryDto carDto = new CarSummaryDto();
+               carDto.setId(booking.getCar().getId());
+               carDto.setMake(booking.getCar().getMake());
+               carDto.setModel(booking.getCar().getModel());
+               carDto.setPlateNumber(booking.getCar().getPlateNumber());
+               resp.setCar(carDto);
+          }
+
           return resp;
      }
+
 }

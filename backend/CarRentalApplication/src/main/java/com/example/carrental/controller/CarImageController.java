@@ -19,10 +19,13 @@ public class CarImageController {
      public CarImageController(CarImageService carImageService) {
           this.carImageService = carImageService;
      }
-     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isCarOwner(#carId)")
+
+     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_OWNER')")
      @PostMapping
      public ResponseEntity<CarImage> uploadImage(@PathVariable("carId") String carId,
                                                  @RequestParam("file") @NotNull MultipartFile file) throws IOException {
+
+
           CarImage saved = carImageService.upload(carId, file);
           return ResponseEntity.status(201).body(saved);
      }

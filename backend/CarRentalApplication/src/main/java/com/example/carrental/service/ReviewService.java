@@ -2,6 +2,9 @@ package com.example.carrental.service;
 
 import com.example.carrental.dto.CreateReviewRequest;
 import com.example.carrental.dto.ReviewResponse;
+import com.example.carrental.exception.BadRequestException;
+import com.example.carrental.exception.ForbiddenException;
+import com.example.carrental.exception.ResourceNotFoundException;
 import com.example.carrental.model.Review;
 import com.example.carrental.model.User;
 import com.example.carrental.repository.BookingRepository;
@@ -57,20 +60,20 @@ public class ReviewService {
      @Transactional
      public ReviewResponse createReview(String carId, CreateReviewRequest req) {
           // ensure car exists
-          carRepository.findById(carId).orElseThrow(() -> new IllegalArgumentException("Car not found"));
+          carRepository.findById(carId).orElseThrow(() -> new ResourceNotFoundException("Car not found"));
 
           // get authenticated user
           Authentication auth = SecurityContextHolder.getContext().getAuthentication();
           if (auth == null || !(auth.getPrincipal() instanceof UserDetails)) {
-               throw new IllegalStateException("Not authenticated");
+               throw new ForbiddenException("Not authenticated");
           }
           String email = ((UserDetails) auth.getPrincipal()).getUsername();
-          User user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalStateException("User not found"));
+          User user = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
           // ensure user had a completed booking for this car
           boolean hadCompleted = bookingRepository.existsByUserIdAndCarIdAndStatus(user.getId(), carId, "COMPLETED");
           if (!hadCompleted) {
-               throw new IllegalArgumentException("User can only review after a completed booking");
+               throw new BadRequestException("User can only review after a completed booking");
           }
 
           Review r = new Review();
@@ -93,14 +96,14 @@ public class ReviewService {
      public void deleteReview(String reviewId) {
 
           Review r = reviewRepository.findById(reviewId)
-                  .orElseThrow(() -> new IllegalArgumentException("Review not found"));
+                  .orElseThrow(() -> new ResourceNotFoundException("Review not found"));
 
           Long reviewOwnerId = r.getUser().getId();
           Long currentUserId = securityService.currentUserId();
           boolean isAdmin = securityService.isCurrentUserAdmin();
 
           if (!isAdmin && !currentUserId.equals(reviewOwnerId)) {
-               throw new SecurityException("Not allowed to delete this review");
+               throw new ForbiddenException("Not allowed to delete this review");
           }
 
           reviewRepository.delete(r);

@@ -1,5 +1,6 @@
 package com.example.carrental.controller;
 
+import com.example.carrental.exception.ResourceNotFoundException;
 import com.example.carrental.model.Location;
 import com.example.carrental.repository.LocationRepository;
 import jakarta.validation.Valid;
@@ -36,7 +37,7 @@ public class LocationController {
 
      @GetMapping("/{id}")
      public ResponseEntity<Location> getLocation(@PathVariable("id") String id) {
-          Location loc = locationRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Location not found"));
+          Location loc = locationRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Location not found"));
           return ResponseEntity.ok(loc);
      }
 }
