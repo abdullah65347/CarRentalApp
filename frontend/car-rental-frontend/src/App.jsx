@@ -35,7 +35,14 @@ export default function App() {
                     <Route path="/auth/register" element={<RegisterPage />} />
 
                     {/* Protected */}
-                    <Route path="/cars/:id/checkout" element={<PrivateRoute> <CarCheckoutPage /></PrivateRoute>} />
+                    <Route
+                        path="/cars/:id/checkout"
+                        element={
+                            <PrivateRoute>
+                                <CarCheckoutPage />
+                            </PrivateRoute>
+                        }
+                    />
                     <Route
                         path="/me/bookings"
                         element={
