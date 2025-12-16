@@ -1,5 +1,6 @@
 package com.example.carrental.controller;
 
+import com.example.carrental.exception.ResourceNotFoundException;
 import com.example.carrental.model.User;
 import com.example.carrental.repository.RoleRepository;
 import com.example.carrental.repository.UserRepository;
@@ -39,10 +40,10 @@ public class AdminController {
      @PutMapping("/users/{id}/roles")
      public ResponseEntity<Void> setUserRoles(@PathVariable("id") Long id,
                                               @RequestParam("roles") String rolesCsv) {
-          User u = userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("User not found"));
+          User u = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found"));
           Set<String> roleNames = java.util.Arrays.stream(rolesCsv.split(",")).map(String::trim).collect(java.util.stream.Collectors.toSet());
           var roles = roleRepository.findAll().stream().filter(r -> roleNames.contains(r.getName())).collect(java.util.stream.Collectors.toSet());
-          if (roles.isEmpty()) throw new IllegalArgumentException("No valid roles provided");
+          if (roles.isEmpty()) throw new ResourceNotFoundException("No valid roles provided");
           u.setRoles(roles);
           userRepository.save(u);
           return ResponseEntity.ok().build();

@@ -4,8 +4,8 @@ import com.example.carrental.model.Booking;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
 import java.time.OffsetDateTime;
-import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface BookingRepository extends JpaRepository<Booking, String> {
@@ -22,8 +22,11 @@ public interface BookingRepository extends JpaRepository<Booking, String> {
      // find pending bookings older than cutoff (used by cleanup)
      List<Booking> findByStatusAndCreatedAtBefore(String status, OffsetDateTime cutoff);
 
-     // optional: list bookings for a user with paging
-     List<Booking> findByUserIdOrderByStartDatetimeDesc(Long userId, Pageable pageable);
-
+     // User → their own bookings
      List<Booking> findByUserId(Long userId);
+
+     // Owner → bookings of their cars
+//     Spring Data automatically translates this to:
+//     WHERE booking.car.owner.id = ?
+     List<Booking> findByCarOwnerId(Long ownerId);
 }

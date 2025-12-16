@@ -4,6 +4,9 @@ import com.example.carrental.dto.AuthResponse;
 import com.example.carrental.dto.LoginRequest;
 import com.example.carrental.dto.RegisterRequest;
 import com.example.carrental.dto.UserDto;
+import com.example.carrental.exception.BadRequestException;
+import com.example.carrental.exception.ForbiddenException;
+import com.example.carrental.exception.ResourceNotFoundException;
 import com.example.carrental.model.Role;
 import com.example.carrental.model.User;
 import com.example.carrental.repository.RoleRepository;
@@ -40,7 +43,7 @@ public class AuthService {
      @Transactional
      public void register(RegisterRequest request) {
           if (userRepository.existsByEmail(request.getEmail())) {
-               throw new IllegalArgumentException("Email already in use");
+               throw new BadRequestException("Email already in use");
           }
 
           User user = new User();
@@ -61,7 +64,7 @@ public class AuthService {
      @Transactional
      public void registerOwner(RegisterRequest request) {
           if (userRepository.existsByEmail(request.getEmail())) {
-               throw new IllegalArgumentException("Email already in use");
+               throw new BadRequestException("Email already in use");
           }
           User user = new User();
           user.setName(request.getName());
@@ -70,7 +73,7 @@ public class AuthService {
           user.setPhone(request.getPhone());
 
           Role ownerRole = roleRepository.findByName("ROLE_OWNER")
-                  .orElseThrow(() -> new RuntimeException("ROLE_OWNER not found"));
+                  .orElseThrow(() -> new ResourceNotFoundException("ROLE_OWNER not found"));
 
           user.setRoles(Set.of(ownerRole));
           userRepository.save(user);
@@ -87,11 +90,11 @@ public class AuthService {
           var authentication = SecurityContextHolder.getContext().getAuthentication();
 
           if (authentication == null || !authentication.isAuthenticated()) {
-               throw new RuntimeException("User not authenticated");
+               throw new ForbiddenException("User not authenticated");
           }
           String email = authentication.getName();
           User user = userRepository.findByEmail(email)
-                  .orElseThrow(() -> new RuntimeException("User not found: " + email));
+                  .orElseThrow(() -> new ResourceNotFoundException("User not found: " + email));
           // Extract role names
           List<String> roleNames = user.getRoles().stream()
                   .map(Role::getName)  // ROLE_USER / ROLE_OWNER / ROLE_ADMIN

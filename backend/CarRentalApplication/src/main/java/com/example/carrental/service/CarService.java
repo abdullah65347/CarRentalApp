@@ -2,6 +2,7 @@ package com.example.carrental.service;
 
 import com.example.carrental.dto.CarResponse;
 import com.example.carrental.dto.CreateCarRequest;
+import com.example.carrental.exception.ResourceNotFoundException;
 import com.example.carrental.model.Car;
 import com.example.carrental.model.Location;
 import com.example.carrental.model.User;
@@ -9,12 +10,8 @@ import com.example.carrental.repository.CarRepository;
 import com.example.carrental.repository.LocationRepository;
 import com.example.carrental.repository.UserRepository;
 import com.example.carrental.util.UniqueIdGenerator;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
@@ -30,11 +27,14 @@ public class CarService {
      private final LocationRepository locationRepository;
      private final UserRepository userRepository;
      private final SecurityService securityService;
-
      private final EntityManager em;
 
-     public CarService(CarRepository carRepository, LocationRepository locationRepository,
-                       UserRepository userRepository, EntityManager em,UniqueIdGenerator idGenerator,SecurityService securityService) {
+     public CarService(CarRepository carRepository,
+                       LocationRepository locationRepository,
+                       UserRepository userRepository,
+                       EntityManager em,
+                       UniqueIdGenerator idGenerator,
+                       SecurityService securityService) {
           this.carRepository = carRepository;
           this.locationRepository = locationRepository;
           this.userRepository = userRepository;
@@ -49,18 +49,19 @@ public class CarService {
                if (!carRepository.existsById(id)) {
                     return id;
                }
-               // Incredibly unlikely to enter retry loop
           }
      }
 
      @Transactional
      public CarResponse createCar(CreateCarRequest req) {
           Car car = new Car();
+
           if (req.getOwnerId() != null) {
                User owner = userRepository.findById(req.getOwnerId())
-                       .orElseThrow(() -> new IllegalArgumentException("Owner not found"));
+                       .orElseThrow(() -> new ResourceNotFoundException("Owner not found"));
                car.setOwner(owner);
           }
+
           car.setId(generateUniqueCarId());
           car.setMake(req.getMake());
           car.setModel(req.getModel());
@@ -75,27 +76,31 @@ public class CarService {
           car.setStatus(req.getStatus() != null ? req.getStatus() : "ACTIVE");
 
           Location loc = locationRepository.findById(req.getLocationId())
-                  .orElseThrow(() -> new IllegalArgumentException("Location not found"));
+                  .orElseThrow(() -> new ResourceNotFoundException("Location not found"));
           car.setLocation(loc);
 
           Car saved = carRepository.save(car);
           return mapToResponse(saved);
      }
-     // get car's by owner's id
-     public Page<CarResponse> getCarsByCurrentOwner(Pageable pageable) {
+
+     // get cars by current owner (pagination removed)
+     public List<CarResponse> getCarsByCurrentOwner() {
           Long ownerId = securityService.currentUserId();
-          Page<Car> cars = carRepository.findByOwnerId(ownerId, pageable);
-          return cars.map(this::mapToResponse);
+          List<Car> cars = carRepository.findByOwnerId(ownerId);
+          return cars.stream().map(this::mapToResponse).collect(Collectors.toList());
      }
 
      @Transactional
      public CarResponse updateCar(String id, CreateCarRequest req) {
-          Car car = carRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Car not found"));
+          Car car = carRepository.findById(id)
+                  .orElseThrow(() -> new ResourceNotFoundException("Car not found"));
+
           if (req.getOwnerId() != null) {
                User owner = userRepository.findById(req.getOwnerId())
-                       .orElseThrow(() -> new IllegalArgumentException("Owner not found"));
+                       .orElseThrow(() -> new ResourceNotFoundException("Owner not found"));
                car.setOwner(owner);
           }
+
           car.setMake(req.getMake());
           car.setModel(req.getModel());
           car.setYear(req.getYear());
@@ -109,7 +114,7 @@ public class CarService {
           car.setStatus(req.getStatus() != null ? req.getStatus() : car.getStatus());
 
           Location loc = locationRepository.findById(req.getLocationId())
-                  .orElseThrow(() -> new IllegalArgumentException("Location not found"));
+                  .orElseThrow(() -> new ResourceNotFoundException("Location not found"));
           car.setLocation(loc);
 
           Car saved = carRepository.save(car);
@@ -117,20 +122,17 @@ public class CarService {
      }
 
      public CarResponse getCar(String id) {
-          Car car = carRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Car not found"));
+          Car car = carRepository.findById(id)
+                  .orElseThrow(() -> new ResourceNotFoundException("Car not found"));
           return mapToResponse(car);
      }
 
      /**
-      * List cars with basic filters:
-      * - city (location.city)
-      * - minPrice, maxPrice
-      * - seats
-      * - carType
-      *
-      * Returns a Page<CarResponse>.
+      * List cars with filters (pagination removed)
       */
-     public Page<CarResponse> listCars(String city, Double minPrice, Double maxPrice, Integer seats, String carType, Pageable pageable) {
+     public List<CarResponse> listCars(String city, Double minPrice, Double maxPrice,
+                                       Integer seats, String carType) {
+
           CriteriaBuilder cb = em.getCriteriaBuilder();
           CriteriaQuery<Car> cq = cb.createQuery(Car.class);
           Root<Car> car = cq.from(Car.class);
@@ -152,21 +154,17 @@ public class CarService {
           if (carType != null && !carType.isBlank()) {
                predicates.add(cb.equal(cb.lower(car.get("carType")), carType.toLowerCase()));
           }
-          predicates.add(cb.equal(car.get("status"), "ACTIVE"));
 
+          predicates.add(cb.equal(car.get("status"), "ACTIVE"));
           cq.where(predicates.toArray(new Predicate[0]));
-          // ordering by id desc as default
           cq.orderBy(cb.desc(car.get("id")));
 
           TypedQuery<Car> query = em.createQuery(cq);
-          int totalRows = query.getResultList().size();
-
-          query.setFirstResult((int) pageable.getOffset());
-          query.setMaxResults(pageable.getPageSize());
           List<Car> resultList = query.getResultList();
 
-          List<CarResponse> content = resultList.stream().map(this::mapToResponse).collect(Collectors.toList());
-          return new PageImpl<>(content, pageable, totalRows);
+          return resultList.stream()
+                  .map(this::mapToResponse)
+                  .collect(Collectors.toList());
      }
 
      private CarResponse mapToResponse(Car c) {

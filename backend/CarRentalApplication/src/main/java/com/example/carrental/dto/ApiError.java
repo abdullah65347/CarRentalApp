@@ -11,11 +11,11 @@ import java.util.List;
 @Getter
 @Setter
 public class ApiError {
-     private OffsetDateTime timestamp = OffsetDateTime.now();
      private int status;
      private String error;
      private String message;
      private String path;
+     private OffsetDateTime timestamp = OffsetDateTime.now();
      private List<String> validationErrors;
 
      public ApiError() {

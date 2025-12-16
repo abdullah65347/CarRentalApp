@@ -1,5 +1,6 @@
 package com.example.carrental.service;
 
+import com.example.carrental.exception.ResourceNotFoundException;
 import com.example.carrental.model.User;
 import com.example.carrental.repository.UserRepository;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -22,7 +23,7 @@ public class CustomUserDetailsService implements UserDetailsService {
      @Override
      public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
           User user = userRepository.findByEmail(username)
-                  .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + username));
+                  .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + username));
 
           var authorities = user.getRoles().stream()
                   .map(r -> new SimpleGrantedAuthority(r.getName()))

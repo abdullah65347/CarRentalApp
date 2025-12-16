@@ -37,5 +37,5 @@ app:
     upload-dir: uploads
     base-url: /uploads
   booking:
-    pending-ttl-minutes: 30
+    pending-ttl-minutes: 1140    # auto cancel pending orders in 24 hrs
     cleanup-interval-ms: 600000     # run cleanup every 600000 ms (10 minutes)

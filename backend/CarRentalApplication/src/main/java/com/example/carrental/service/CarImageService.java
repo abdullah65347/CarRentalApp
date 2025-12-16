@@ -1,5 +1,7 @@
 package com.example.carrental.service;
 
+import com.example.carrental.exception.BadRequestException;
+import com.example.carrental.exception.ResourceNotFoundException;
 import com.example.carrental.model.Car;
 import com.example.carrental.model.CarImage;
 import com.example.carrental.repository.CarImageRepository;
@@ -29,13 +31,17 @@ public class CarImageService {
 
      @Transactional
      public CarImage upload(String carId, MultipartFile file) throws IOException {
+          if (file == null || file.isEmpty()) {
+               throw new BadRequestException("File is required");
+          }
+
           Car car = carRepository.findById(carId)
-                  .orElseThrow(() -> new IllegalArgumentException("Car not found"));
+                  .orElseThrow(() -> new ResourceNotFoundException("Car not found"));
 
           // Basic content-type validation (allow images)
           String ct = file.getContentType();
           if (ct == null || (!ct.startsWith("image/"))) {
-               throw new IllegalArgumentException("Only image uploads are allowed");
+               throw new BadRequestException("Only image uploads are allowed");
           }
 
           String url = fileStorageService.storeFile(file, carId);
@@ -58,7 +64,7 @@ public class CarImageService {
      @Transactional
      public void setPrimary(String carId, Long imageId) {
           CarImage target = carImageRepository.findByIdAndCarId(imageId, carId)
-                  .orElseThrow(() -> new IllegalArgumentException("Image not found for this car"));
+                  .orElseThrow(() -> new ResourceNotFoundException("Image not found for this car"));
 
           // unset previous primary
           List<CarImage> imgs = carImageRepository.findByCarIdOrderByIsPrimaryDescUploadedAtDesc(carId);
@@ -75,7 +81,7 @@ public class CarImageService {
      @Transactional
      public void delete(String carId, Long imageId) {
           CarImage img = carImageRepository.findByIdAndCarId(imageId, carId)
-                  .orElseThrow(() -> new IllegalArgumentException("Image not found for this car"));
+                  .orElseThrow(() -> new ResourceNotFoundException("Image not found for this car"));
 
           // delete file if stored locally
           fileStorageService.deleteFileByUrl(img.getUrl());
