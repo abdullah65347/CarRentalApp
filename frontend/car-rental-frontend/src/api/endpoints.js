@@ -12,6 +12,10 @@ export const ENDPOINTS = {
         CREATE: "/cars",
     },
 
+    CARIMAGES: {
+        IMAGES: (carId) => `/cars/${carId}/images`,
+    },
+
     LOCATIONS: {
         LIST: "/locations",
         BY_ID: (id) => `/locations/${id}`,

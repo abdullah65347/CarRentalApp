@@ -21,5 +21,6 @@ export function validateCar(car) {
     if (!car.model) return "Model is required";
     if (!car.pricePerDay || car.pricePerDay <= 0) return "Invalid price";
     if (!car.locationId) return "Location is required";
+    if (car.seats > 9) return "Seats must be less than 9"
     return null;
 }

@@ -4,7 +4,7 @@ import { ENDPOINTS } from "../../api/endpoints";
 import Modal from "../../components/ui/Modal";
 import { useToast } from "../../context/ToastContext";
 
-export default function ManageUser({ users, reload }) {
+export default function ManageAllUsers({ users, reload }) {
     const { show } = useToast();
 
     const [savingId, setSavingId] = useState(null);

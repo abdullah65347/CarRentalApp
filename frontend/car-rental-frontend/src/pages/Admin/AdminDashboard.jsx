@@ -3,10 +3,9 @@ import api from "../../api/apiClient";
 import { ENDPOINTS } from "../../api/endpoints";
 import Card from "../../components/ui/Card";
 import Spinner from "../../components/ui/Spinner";
-
-import ManageUser from "./ManageUsers";
 import ManageAllCars from "./ManageAllCars";
 import ManageAllBookings from "./ManageAllBookings";
+import ManageAllUsers from "./ManageAllUsers";
 
 export default function AdminDashboard() {
     const [users, setUsers] = useState([]);
@@ -119,7 +118,7 @@ export default function AdminDashboard() {
                 {/* ===== TAB CONTENT ===== */}
                 <div className="p-6">
                     {activeView === "USERS" && (
-                        <ManageUser users={users} reload={loadAll} />
+                        <ManageAllUsers users={users} reload={loadAll} />
                     )}
 
                     {activeView === "CARS" && (

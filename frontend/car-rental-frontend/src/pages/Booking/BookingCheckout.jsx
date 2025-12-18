@@ -2,13 +2,10 @@ import { useState } from "react";
 import api from "../../api/apiClient";
 import { ENDPOINTS } from "../../api/endpoints";
 import { validateBooking } from "../../utils/validators";
-
-import BookingSummary from "../../components/booking/BookingSummary";
-import Button from "../../components/ui/Button";
 import DateHeader from "../../components/booking/DateHeader";
 import DateRangePicker from "../../components/booking/DateRangePicker";
-import LocationPicker from "../../components/LocationPicker";
 import { useToast } from "../../context/ToastContext";
+import LocationPicker from "../../components/location/LocationPicker";
 
 export default function BookingCheckout({ car, locations }) {
     const toast = useToast();
@@ -106,22 +103,6 @@ export default function BookingCheckout({ car, locations }) {
                     />
 
                 )}
-            </div>
-
-            {/* ================= RIGHT ================= */}
-            <div className="space-y-4">
-                <BookingSummary
-                    car={car}
-                    pickupLocation={pickupLocation}
-                    dropoffLocation={dropoffLocation}
-                    startDatetime={startDate}
-                    endDatetime={endDate}
-                    totalPrice={car.pricePerDay}
-                />
-
-                <Button loading={loading} onClick={confirmBooking}>
-                    Confirm Booking
-                </Button>
             </div>
         </div>
     );
