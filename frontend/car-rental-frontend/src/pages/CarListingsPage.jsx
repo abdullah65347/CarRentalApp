@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import api from '../api/apiClient'
-import CarCard from '../components/car/carCard'
 import { ENDPOINTS } from '../api/endpoints'
+import CarCard from '../components/car/CarCard'
 
-export default function ListingsPage() {
+export default function CarListingsPage() {
     const [cars, setCars] = useState([])
     const [loading, setLoading] = useState(true)
 
@@ -26,7 +26,7 @@ export default function ListingsPage() {
                 <p>No cars available.</p>
             )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {cars.map(car => (
                     <CarCard key={car.id} car={car} />
                 ))}

@@ -7,6 +7,7 @@ html,
 body,
 #root {
     height: 100%;
+    margin: 0;
 }
 
 body {
@@ -16,28 +17,21 @@ body {
 .input {
     width: 100%;
     padding: 0.5rem 0.75rem;
-    /* px-3 py-2 */
     border: 1px solid #d1d5db;
-    /* gray-300 */
     border-radius: 0.5rem;
-    /* rounded-lg */
     font-size: 0.875rem;
-    /* text-sm */
     color: #111827;
-    /* gray-900 */
     background-color: #ffffff;
 }
 
 .input:focus {
     outline: none;
     border-color: #2563eb;
-    /* blue-600 */
     box-shadow: 0 0 0 1px #2563eb;
 }
 
 .input::placeholder {
     color: #9ca3af;
-    /* gray-400 */
 }
 
 /* Toast container animation */
@@ -126,4 +120,63 @@ body {
         opacity: 0;
         transform: translateX(0) translateY(-25px);
     }
+}
+
+/* reusable hover + card effect */
+
+.card-hover {
+    transition: all 0.35s ease;
+}
+
+.card-hover:hover {
+    /* transform: translateY(-1px); */
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* reusable image zoom */
+.image-zoom {
+    transform: scale(1.08);
+    transition: transform 0.4s ease;
+}
+
+.group:hover .image-zoom {
+    transform: scale(1.1);
+}
+
+.carousel-btn {
+    position: absolute;
+    top: 50%;
+    z-index: 10;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    transform: translateY(-50%);
+    transition: background-color .2s ease;
+}
+
+.carousel-btn:hover {
+    background: #e3e2e2;
+    /* gray-100 */
+}
+
+.carousel-btn.left {
+    left: .5rem;
+}
+
+.carousel-btn.right {
+    right: .5rem;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none
 }

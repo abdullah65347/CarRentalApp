@@ -5,7 +5,6 @@ import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
 
 import HomePage from "./pages/HomePage";
-import ListingsPage from "./pages/ListingsPage";
 import CarDetailPage from "./pages/CarDetailPage";
 
 import LoginPage from "./pages/Auth/LoginPage";
@@ -19,6 +18,7 @@ import PrivateRoute from "./routes/PrivateRoute";
 import BookingCheckout from "./pages/Booking/BookingCheckout";
 import CarCheckoutPage from "./pages/Booking/CarCheckoutPage";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
+import CarListingsPage from "./pages/CarListingsPage";
 
 export default function App() {
     return (
@@ -29,7 +29,7 @@ export default function App() {
                 <Routes>
                     {/* Public */}
                     <Route path="/" element={<HomePage />} />
-                    <Route path="/cars" element={<ListingsPage />} />
+                    <Route path="/cars" element={<CarListingsPage />} />
                     <Route path="/cars/:id" element={<CarDetailPage />} />
                     <Route path="/auth/login" element={<LoginPage />} />
                     <Route path="/auth/register" element={<RegisterPage />} />
