@@ -24,7 +24,7 @@ public class Review {
 
      @ManyToOne
      @JoinColumn(name = "user_id")
-     private com.example.carrental.model.User user;
+     private User user;
 
      @ManyToOne
      @JoinColumn(name = "car_id")

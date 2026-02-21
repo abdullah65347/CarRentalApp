@@ -1,4 +1,4 @@
-Great — below is a complete, organized list of all endpoints your backend exposes (based on the code you and I added) together with dummy request bodies and quick Postman/curl examples you can paste into Postman. For every protected endpoint remember to set the header:
+Great — below is a complete, organized list of all endpoints your backend exposes (based on the code added) together with dummy request bodies and quick Postman/curl examples you can paste into Postman. For every protected endpoint remember to set the header:
 Authorization: Bearer <ACCESS_TOKEN>
 (Use the token returned by login.)
 
@@ -211,9 +211,3 @@ Quick Postman setup tips
 		○ Value: Bearer {{token}}
 	4. For file uploads use Body -> form-data and add file field (type File).
 	5. Use the dummy JSON bodies above for requests; edit IDs to match your seeded/generated IDs.
-
-If you want, I can now:
-	• generate a Postman collection (JSON) with all of the requests above populated (you can import into Postman directly),
-or
-	• create a single bash script using curl that runs through the full happy path (register → login → create location → create car → upload image → create booking → confirm booking → mark completed → create review).
-Which would you like next?

@@ -1,6 +1,7 @@
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
 import { useState } from "react";
+import { ChevronUp, ChevronDown, Check } from "lucide-react";
 
 export default function DateRangePicker({
     value,
@@ -86,15 +87,52 @@ export default function DateRangePicker({
 
                     {/* TIME */}
                     <div className="border-l p-5 flex justify-center items-center gap-6">
-                        <Time value={hour} onUp={incHour} onDown={decHour} />
-                        <div className="text-2xl font-bold">:</div>
-                        <Time value={minute} onUp={incMinute} onDown={decMinute} />
 
-                        <div className="flex flex-col items-center gap-2">
-                            <button onClick={toggleAmPm}>▲</button>
-                            <div className="font-semibold">{ampm}</div>
-                            <button onClick={toggleAmPm}>▼</button>
+                        <div className="relative p-6 flex justify-center items-center">
+
+                            <div className="flex items-center gap-6">
+
+                                <ModernTime value={hour} onUp={incHour} onDown={decHour} label="Hour" />
+
+                                <div className="text-3xl font-light text-gray-400">:</div>
+
+                                <ModernTime value={minute} onUp={incMinute} onDown={decMinute} label="Min" />
+
+                                {/* AM PM Toggle */}
+                                <div className="flex flex-col items-center ml-4">
+                                    <div className="bg-gray-100 rounded-full p-1 flex flex-col shadow-inner">
+                                        <button
+                                            onClick={() => setAmpm("AM")}
+                                            className={`px-4 py-1 rounded-full text-sm transition ${ampm === "AM"
+                                                ? "btn-dark-gradient text-white shadow-md"
+                                                : "text-gray-500"
+                                                }`}
+                                        >
+                                            AM
+                                        </button>
+                                        <button
+                                            onClick={() => setAmpm("PM")}
+                                            className={`px-4 py-1 rounded-full text-sm transition ${ampm === "PM"
+                                                ? "btn-dark-gradient text-white shadow-md"
+                                                : "text-gray-500"
+                                                }`}
+                                        >
+                                            PM
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* SELECT BUTTON */}
                         </div>
+                        <button
+                            onClick={saveAndClose}
+                            className="absolute bottom-4 right-4 btn-dark-gradient text-white px-4 py-2 rounded-full shadow-lg flex items-center gap-2 text-sm transition"
+                        >
+                            <Check size={16} />
+                            Select
+                        </button>
+
                     </div>
                 </div>
             </div>
@@ -102,14 +140,30 @@ export default function DateRangePicker({
     );
 }
 
-function Time({ value, onUp, onDown }) {
+function ModernTime({ value, onUp, onDown, label }) {
     return (
-        <div className="flex flex-col items-center gap-2">
-            <button onClick={onUp}>▲</button>
-            <div className="text-2xl font-bold w-10 text-center">
+        <div className="flex flex-col items-center gap-3">
+
+            <button
+                onClick={onUp}
+                className="p-2 rounded-full bg-gray-100 hover:bg-indigo-100 transition shadow-sm"
+            >
+                <ChevronUp size={18} />
+            </button>
+
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-indigo-50 to-white shadow-inner flex items-center justify-center border text-2xl font-semibold">
                 {String(value).padStart(2, "0")}
             </div>
-            <button onClick={onDown}>▼</button>
+
+            <button
+                onClick={onDown}
+                className="p-2 rounded-full bg-gray-100 hover:bg-indigo-100 transition shadow-sm"
+            >
+                <ChevronDown size={18} />
+            </button>
+
+            <div className="text-xs text-gray-400">{label}</div>
         </div>
     );
 }
+

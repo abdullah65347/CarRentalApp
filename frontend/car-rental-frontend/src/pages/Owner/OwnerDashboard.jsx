@@ -63,7 +63,7 @@ export default function OwnerDashboard() {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="mx-3 space-y-6">
             {/* HEADER */}
             <div>
                 <h1 className="text-2xl font-bold text-gray-900">
@@ -75,7 +75,7 @@ export default function OwnerDashboard() {
             </div>
 
             {/* STATS */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="mx-4 grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Card>
                     <div className="text-sm text-gray-500">Total Cars</div>
                     <div className="text-2xl font-semibold">

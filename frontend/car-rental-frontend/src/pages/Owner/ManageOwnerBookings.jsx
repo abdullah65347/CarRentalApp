@@ -103,6 +103,9 @@ export default function ManageOwnerBookings({ bookings, reload }) {
                     <p className="text-xs text-red-600">
                         This action cannot be undone.
                     </p>
+                    <div>
+                        <input className="input" type="text" placeholder="Give reason for cancellation..." />
+                    </div>
                 </div>
             </Modal>
         </>

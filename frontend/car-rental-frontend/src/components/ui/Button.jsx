@@ -10,7 +10,7 @@ export default function Button({
     ...props
 }) {
     const base =
-        "inline-flex items-center justify-center gap-2 rounded font-medium transition " +
+        "inline-flex items-center justify-center gap-2 transition " +
         "disabled:opacity-50 disabled:cursor-not-allowed";
 
     const sizes = {
@@ -20,15 +20,20 @@ export default function Button({
     };
 
     const variants = {
-        primary: "bg-blue-600 text-white hover:bg-blue-700",
-        secondary: "bg-gray-200 text-gray-800 hover:bg-gray-300",
-        danger: "bg-red-600 text-white hover:bg-red-700",
-        ghost: "bg-transparent text-gray-700 hover:bg-gray-100",
+        primary: "bg-blue-600 text-white hover:bg-blue-700 rounded",
+        secondary: "bg-gray-200 text-gray-800 hover:bg-gray-300 rounded",
+        danger: "bg-red-600 text-white hover:bg-red-700 rounded",
+        custom: "", //  no predefined styles for cutom buttons
     };
 
     return (
         <button
-            className={`${base} ${sizes[size]} ${variants[variant]} ${className}`}
+            className={`
+                ${base}
+                ${variant !== "custom" ? sizes[size] : ""}
+                ${variants[variant]}
+                ${className}
+            `}
             disabled={disabled || loading}
             {...props}
         >

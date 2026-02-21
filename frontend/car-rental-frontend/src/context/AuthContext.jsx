@@ -1,40 +1,59 @@
-import React, { createContext, useState, useEffect } from "react";
+import { createContext, useEffect, useState } from "react";
 import api from "../api/apiClient";
-import { ENDPOINTS } from "../api/endpoints";
 
-export const AuthContext = createContext(null);
+export const AuthContext = createContext();
 
-function AuthProvider({ children }) {
+export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
-    const [token, setToken] = useState(localStorage.getItem("access_token") || null);
+    const [loading, setLoading] = useState(true);
 
+    /* ---------- LOAD USER ON REFRESH ---------- */
     useEffect(() => {
+        const token = localStorage.getItem("access_token");
+
         if (!token) {
-            setUser(null);
+            setLoading(false);
             return;
         }
 
-        api.get(ENDPOINTS.AUTH.ME)
+        api.get("/auth/me")
             .then(res => setUser(res.data))
-            .catch(() => setUser(null));
-    }, [token]);
+            .catch(() => {
+                localStorage.removeItem("access_token");
+                setUser(null);
+            })
+            .finally(() => setLoading(false));
+    }, []);
 
-    const login = (tokenValue) => {
-        localStorage.setItem("access_token", tokenValue);
-        setToken(tokenValue);
-    };
+    /* ---------- LOGIN ---------- */
+    function login(token) {
+        localStorage.setItem("access_token", token);
 
-    const logout = () => {
+        // Fetch user after login
+        api.get("/auth/me")
+            .then(res => setUser(res.data))
+            .catch(() => {
+                localStorage.removeItem("access_token");
+                setUser(null);
+            });
+    }
+
+    /* ---------- LOGOUT (THIS IS REQUIRED) ---------- */
+    function logout() {
         localStorage.removeItem("access_token");
-        setToken(null);
         setUser(null);
-    };
+    }
 
     return (
-        <AuthContext.Provider value={{ user, setUser, token, login, logout }}>
+        <AuthContext.Provider
+            value={{
+                user,
+                loading,
+                login,
+                logout,
+            }}
+        >
             {children}
         </AuthContext.Provider>
     );
 }
-
-export default AuthProvider;

@@ -1,10 +1,13 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { ENDPOINTS } from "../api/endpoints";
 import api from "../api/apiClient";
 import Card from "../components/ui/Card";
 import Spinner from "../components/ui/Spinner";
 import Button from "../components/ui/Button";
 import { useToast } from "../context/ToastContext";
+import { AuthContext } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+
 
 const MAX_NOTES_LENGTH = 500;
 
@@ -13,6 +16,18 @@ export default function Profile() {
 
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+
+    const { logout: authLogout } = useContext(AuthContext);
+    const navigate = useNavigate();
+
+    function logout() {
+        authLogout(); // clears user + token
+        localStorage.removeItem("quick_notes");
+
+        toast.show("Logged out successfully");
+
+        navigate("/"); // go to home
+    }
 
     // Quick Notes (session-based)
     const [notes, setNotes] = useState(
@@ -35,13 +50,6 @@ export default function Profile() {
         setNotes("");
         localStorage.removeItem("quick_notes");
         toast.show("Notes cleared");
-    }
-
-    function logout() {
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("quick_notes"); // clear notes on logout
-        toast.show("Logged out successfully");
-        window.location.href = "/auth/login";
     }
 
     if (loading) {

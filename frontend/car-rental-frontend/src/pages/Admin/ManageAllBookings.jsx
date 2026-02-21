@@ -94,7 +94,7 @@ export default function ManageAllBookings({ bookings, reload }) {
                         <div>User: {selectedBooking?.user?.name}</div>
                     </div>
                     <div>
-                        <input type="text" placeholder="Give reason for cancellation..." />
+                        <input className="input" type="text" placeholder="Give reason for cancellation..." />
                     </div>
 
                     <p className="text-xs text-red-600">
