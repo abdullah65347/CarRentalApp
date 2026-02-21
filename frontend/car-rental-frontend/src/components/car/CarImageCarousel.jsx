@@ -1,15 +1,26 @@
 import { useRef } from "react";
-import CarCard from "./CarCard";
 
-export default function CarCardCarousel({ cars }) {
+export default function CarImageCarousel({
+    items = [],
+    renderItem,
+    itemWidth = 260,
+    gap = 24,
+}) {
     const ref = useRef(null);
-    const CARD_WIDTH = 260 + 24;
+    const SCROLL_AMOUNT = itemWidth + gap;
 
-    const scroll = dir =>
-        ref.current.scrollBy({ left: dir * CARD_WIDTH, behavior: "smooth" });
+    const scroll = (dir) => {
+        ref.current?.scrollBy({
+            left: dir * SCROLL_AMOUNT,
+            behavior: "smooth",
+        });
+    };
+
+    if (!items.length) return null;
 
     return (
         <div className="relative w-full">
+            {/* LEFT */}
             <button onClick={() => scroll(-1)} className="carousel-btn left" aria-label="Previous">
                 <svg viewBox="0 0 24 24" className="w-5 h-5 text-gray-700">
                     <path d="M15 18l-6-6 6-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -22,13 +33,17 @@ export default function CarCardCarousel({ cars }) {
                 </svg>
             </button>
 
+            {/* CONTENT */}
             <div
                 ref={ref}
-                className="p-4 flex gap-6 overflow-x-auto scroll-smooth px-9 no-scrollbar"
+                className="flex gap-6 overflow-x-auto scroll-smooth px-6 no-scrollbar"
             >
-                {cars.map(car => (
-                    <div key={car.id} className="min-w-[260px] max-w-[260px]">
-                        <CarCard car={car} />
+                {items.map((item, idx) => (
+                    <div
+                        key={item.id || idx}
+                        style={{ minWidth: itemWidth }}
+                    >
+                        {renderItem(item)}
                     </div>
                 ))}
             </div>

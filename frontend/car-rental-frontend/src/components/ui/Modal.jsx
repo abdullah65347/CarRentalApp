@@ -8,9 +8,11 @@ export default function Modal({
     onConfirm,
     confirmText = "Confirm",
     cancelText = "Cancel",
-    variant = "primary", // primary | danger
+    variant = "primary", // primary | danger | Custom
+    confirmClassName = "", // custom class for button
     loading = false,
     size = "md",
+    hideCancelBtn = false,
     hideFooter = false,
 }) {
     if (!open) return null;
@@ -53,17 +55,18 @@ export default function Modal({
                 {/* FOOTER */}
                 {!hideFooter && (
                     <div className="flex justify-end gap-3 px-6 py-4 rounded-b-xl">
-                        <Button
+                        {!hideCancelBtn && (<Button
                             variant="secondary"
                             onClick={onClose}
                             disabled={loading}
                         >
                             {cancelText}
-                        </Button>
+                        </Button>)}
 
                         {onConfirm && (
                             <Button
                                 variant={variant}
+                                className={confirmClassName}
                                 loading={loading}
                                 onClick={onConfirm}
                             >

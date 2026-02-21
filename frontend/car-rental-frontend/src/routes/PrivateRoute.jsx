@@ -1,15 +1,25 @@
-import { Navigate } from "react-router-dom";
+import { useContext, useEffect } from "react";
+import { AuthContext } from "../context/AuthContext";
+import { AuthModalContext } from "../context/AuthModalContext";
 
 export default function PrivateRoute({ children }) {
-    const token = localStorage.getItem("access_token");
+    const { user, loading } = useContext(AuthContext);
+    const { openLogin } = useContext(AuthModalContext);
 
-    if (!token) {
-        return (
-            <Navigate
-                to="/auth/login"
-                replace
-            />
-        );
+    useEffect(() => {
+        if (!loading && !user) {
+            openLogin();
+        }
+    }, [loading, user, openLogin]);
+
+    // ⛔ Wait until auth check completes
+    if (loading) {
+        return null; // or a loader spinner
+    }
+
+    // ⛔ If not logged in after loading, block route
+    if (!user) {
+        return null;
     }
 
     return children;

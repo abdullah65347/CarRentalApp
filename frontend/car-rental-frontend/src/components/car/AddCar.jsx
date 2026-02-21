@@ -30,7 +30,7 @@ export default function AddCar({ open, onClose, onSaved }) {
         status: "ACTIVE",
     });
 
-    // ✅ auto-fill ownerId for OWNER
+    // auto-fill ownerId for OWNER
     useEffect(() => {
         if (!isAdmin && user?.id) {
             setForm(prev => ({ ...prev, ownerId: user.id }));

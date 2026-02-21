@@ -1,14 +1,13 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Routes, Route } from "react-router-dom";
 
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
 
 import HomePage from "./pages/HomePage";
-import CarDetailPage from "./pages/CarDetailPage";
 
-import LoginPage from "./pages/Auth/LoginPage";
-import RegisterPage from "./pages/Auth/RegisterPage";
+// import LoginPage from "./pages/Auth/LoginPage";
+// import RegisterPage from "./pages/Auth/RegisterPage";
 
 import MyBookings from "./pages/Booking/MyBookings";
 import Profile from "./pages/Profile";
@@ -19,20 +18,20 @@ import BookingCheckout from "./pages/Booking/BookingCheckout";
 import CarCheckoutPage from "./pages/Booking/CarCheckoutPage";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import CarListingsPage from "./pages/CarListingsPage";
+import AuthModal from "./components/auth/AuthModal";
+import { AuthModalContext } from "./context/AuthModalContext";
 
 export default function App() {
+    const { open, mode, close } = useContext(AuthModalContext);
     return (
-        <div className="min-h-screen flex flex-col">
+        <div className="min-h-screen flex flex-col w-full">
             <Header />
-            <main className="flex-1 container mx-auto px-4 py-6">
+            <main className="flex-1 w-full">
 
                 <Routes>
                     {/* Public */}
                     <Route path="/" element={<HomePage />} />
                     <Route path="/cars" element={<CarListingsPage />} />
-                    <Route path="/cars/:id" element={<CarDetailPage />} />
-                    <Route path="/auth/login" element={<LoginPage />} />
-                    <Route path="/auth/register" element={<RegisterPage />} />
 
                     {/* Protected */}
                     <Route
@@ -80,6 +79,7 @@ export default function App() {
                 </Routes>
             </main>
             <Footer />
+            <AuthModal />
         </div>
     );
 }

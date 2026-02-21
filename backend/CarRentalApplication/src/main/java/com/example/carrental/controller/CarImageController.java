@@ -36,7 +36,7 @@ public class CarImageController {
           return ResponseEntity.ok(imgs);
      }
 
-     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isCarOwner(#carId)")
+     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_OWNER')")
      @PutMapping("/{imageId}/primary")
      public ResponseEntity<Void> setPrimary(@PathVariable("carId") String carId,
                                             @PathVariable("imageId") Long imageId) {
@@ -44,7 +44,7 @@ public class CarImageController {
           return ResponseEntity.ok().build();
      }
 
-     @PreAuthorize("hasRole('ROLE_ADMIN') or @securityService.isCarOwner(#carId)")
+     @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_OWNER')")
      @DeleteMapping("/{imageId}")
      public ResponseEntity<Void> deleteImage(@PathVariable("carId") String carId,
                                              @PathVariable("imageId") Long imageId) {

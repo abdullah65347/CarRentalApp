@@ -1,88 +1,82 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Star, Fuel, Users, Gauge } from "lucide-react";
 import api from "../../api/apiClient";
 import { ENDPOINTS } from "../../api/endpoints";
+import { BACKEND_BASE_URL } from "../../config/env";
 
-export default function CarCard({ car }) {
-    const navigate = useNavigate();
-    const API_BASE =
-        import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
-
+export default function CarCard({ car, onView, index = 0 }) {
     const [image, setImage] = useState(null);
 
     useEffect(() => {
         api.get(ENDPOINTS.CARIMAGES.IMAGES(car.id))
             .then(res => {
                 const primary = res.data.find(img => img.isPrimary);
-                if (primary) setImage(API_BASE + primary.url);
+                if (primary) setImage(BACKEND_BASE_URL + primary.url);
             })
             .catch(() => { });
     }, [car.id]);
 
     return (
-        <div
-            onClick={() => navigate(`/cars/${car.id}`)}
-            className="group cursor-pointer rounded-xl overflow-hidden bg-gradient-to-b from-white to-gray-50
-        shadow-lg card-hover">
+        <div className="bg-white rounded-2xl overflow-hidden card-hover hover:card-hover transition-shadow duration-300 group">
+
             {/* IMAGE */}
-            <div className="relative h-[180px]
-                        bg-gray-100
-                        flex items-center justify-center
-                        overflow-hidden
-             ">
+            <div className="relative h-48 overflow-hidden">
                 <img
                     src={image || "/car-placeholder.png"}
                     alt={car.make}
-                    className="w-full h-full object-contain object-center image-zoom"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
-
-                {/* PRICE BADGE */}
-                <div className="
-            absolute top-3 right-3
-            bg-gray-900/85 text-white
-            text-xs px-3 py-1.5
-            rounded-full
-            backdrop-blur
-        ">
-                    ₹ {car.pricePerDay} / day
-                </div>
             </div>
 
             {/* CONTENT */}
-            <div className="p-4 space-y-3">
-                <div>
-                    <p className="text-xs text-gray-500">{car.model}</p>
-                    <h2 className="text-lg font-semibold text-gray-900">
-                        {car.make}
-                    </h2>
-                </div>
+            <div className="p-5">
 
-                {/* DIVIDER */}
-                <div className="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
+                {/* Brand + Name */}
+                <p className="text-xs text-gray-500 uppercase tracking-wider font-medium">
+                    {car.model}
+                </p>
+
+                <h3 className="text-xl font-semibold text-foreground mt-1">
+                    {car.make}
+                </h3>
 
                 {/* FEATURES */}
-                <div className="flex justify-between text-xs text-gray-600">
-                    <span>{car.carType}</span>
-                    <span>{car.transmission}</span>
-                    <span>{car.seats} Seats</span>
+                <div className="flex items-center justify-between text-sm text-gray-500 pt-2">
+
+                    <div className="flex items-center gap-1">
+                        <Users className="h-4 w-4 text-gray-400" />
+                        {car.seats}
+                    </div>
+
+                    <div className="flex items-center gap-1">
+                        <Fuel className="h-4 w-4 text-gray-400" />
+                        {car.carType}
+                    </div>
+
+                    <div className="flex items-center gap-1">
+                        <Gauge className="h-4 w-4 text-gray-400" />
+                        {car.transmission}
+                    </div>
                 </div>
 
-                {/* CTA */}
-                <button
-                    className="
-                mt-2 w-full
-                py-2 rounded-lg
-                text-sm font-medium
-                bg-gradient-to-r from-gray-900 to-gray-800
-                text-white
-                transition
-                hover:translate-x-1
-            "
-                >
-                    View Details →
-                </button>
+                {/* Price + Button */}
+                <div className="flex items-center justify-between my-2 py-2 px-2 border-t border-gray-400">
+                    <div>
+                        <span className="text-xl font-bold text-foreground">
+                            ₹{car.pricePerDay}
+                        </span>
+                        <span className="text-sm text-gray-500"> /day</span>
+                    </div>
+
+                    <button
+                        onClick={() => onView(car)}
+                        className="px-4 py-2 text-sm font-medium rounded-xl text-white transition btn-dark-gradient "
+                    >
+                        View Details
+                    </button>
+                </div>
+
             </div>
         </div>
-
     );
 }
