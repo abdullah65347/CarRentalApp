@@ -12,6 +12,9 @@ export default function ManageAllBookings({ bookings, reload }) {
     const [selectedBooking, setSelectedBooking] = useState(null);
     const [loading, setLoading] = useState(false);
     const [cancellingId, setCancellingId] = useState(null);
+    const [cancelReason, setCancelReason] = useState("");
+    const [confirmingId, setConfirmingId] = useState(null);
+
 
     function closeModal() {
         setSelectedBooking(null);
@@ -25,7 +28,7 @@ export default function ManageAllBookings({ bookings, reload }) {
             setCancellingId(selectedBooking.id);
 
             await api.put(
-                ENDPOINTS.BOOKINGS.CANCEL(selectedBooking.id)
+                `${ENDPOINTS.BOOKINGS.CANCEL(selectedBooking.id)}?reason=${encodeURIComponent(cancelReason)}`
             );
 
             show("Booking cancelled successfully", "success");
@@ -35,6 +38,23 @@ export default function ManageAllBookings({ bookings, reload }) {
             show("Failed to cancel booking", "error");
             setLoading(false);
             setCancellingId(null);
+        }
+    }
+
+    async function confirmBooking(booking) {
+        try {
+            setConfirmingId(booking.id);
+
+            await api.put(
+                ENDPOINTS.BOOKINGS.CONFIRM(booking.id)
+            );
+
+            show("Booking confirmed successfully", "success");
+            reload();
+        } catch {
+            show("Failed to confirm booking", "error");
+        } finally {
+            setConfirmingId(null);
         }
     }
 
@@ -56,15 +76,25 @@ export default function ManageAllBookings({ bookings, reload }) {
                         showUser
                         actions={
                             b.status === "PENDING" && (
-                                <Button
-                                    variant="danger"
-                                    size="sm"
-                                    loading={cancellingId === b.id}
-                                    onClick={() => setSelectedBooking(b)}
-                                    className="mt-4"
-                                >
-                                    Cancel Booking
-                                </Button>
+                                <div className="flex gap-2 mt-4">
+                                    <Button
+                                        variant="primary"
+                                        size="sm"
+                                        loading={confirmingId === b.id}
+                                        onClick={() => confirmBooking(b)}
+                                    >
+                                        Confirm
+                                    </Button>
+
+                                    <Button
+                                        variant="danger"
+                                        size="sm"
+                                        loading={cancellingId === b.id}
+                                        onClick={() => setSelectedBooking(b)}
+                                    >
+                                        Cancel
+                                    </Button>
+                                </div>
                             )
                         }
                     />
@@ -94,8 +124,13 @@ export default function ManageAllBookings({ bookings, reload }) {
                         <div>User: {selectedBooking?.user?.name}</div>
                     </div>
                     <div>
-                        <input className="input" type="text" placeholder="Give reason for cancellation..." />
-                    </div>
+                        <input
+                            className="input"
+                            type="text"
+                            placeholder="Give reason for cancellation..."
+                            value={cancelReason}
+                            onChange={(e) => setCancelReason(e.target.value)}
+                        />                    </div>
 
                     <p className="text-xs text-red-600">
                         This action cannot be undone.

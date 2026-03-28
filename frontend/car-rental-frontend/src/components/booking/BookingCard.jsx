@@ -10,9 +10,14 @@ export default function BookingCard({
     function statusBadge(status) {
         switch (status) {
             case "COMPLETED":
+            case "CONFIRMED":
                 return "bg-green-100 text-green-700";
+
             case "CANCELLED":
+            case "FAILED":
                 return "bg-red-100 text-red-700";
+
+            case "PENDING":
             default:
                 return "bg-yellow-100 text-yellow-700";
         }
@@ -59,6 +64,11 @@ export default function BookingCard({
                     <span className="font-medium">Total Price:</span>{" "}
                     ₹{booking.totalPrice}
                 </div>
+                {booking.status === "CANCELLED" && booking.cancellationReason && (
+                    <div className="mt-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-xs text-red-700">
+                        <span className="font-medium">Reason:</span> {booking.cancellationReason}
+                    </div>
+                )}
             </div>
 
             {/* RIGHT */}

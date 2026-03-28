@@ -1,4 +1,5 @@
-// src/components/booking/LocationPicker.jsx
+import { useState, useRef, useEffect } from "react";
+import { MapPin, ChevronDown } from "lucide-react";
 
 export default function LocationPicker({
     pickupLocationId,
@@ -7,56 +8,113 @@ export default function LocationPicker({
     onPickupChange,
     onDropoffChange,
 }) {
+    const [openPickup, setOpenPickup] = useState(false);
+    const [openDropoff, setOpenDropoff] = useState(false);
+
+    const pickupRef = useRef(null);
+    const dropoffRef = useRef(null);
+
+    const getLocationName = (id) =>
+        locations.find((l) => l.id === id)?.name || "";
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (
+                pickupRef.current &&
+                !pickupRef.current.contains(event.target)
+            ) {
+                setOpenPickup(false);
+            }
+
+            if (
+                dropoffRef.current &&
+                !dropoffRef.current.contains(event.target)
+            ) {
+                setOpenDropoff(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
+
     return (
-        <div className="bg-white rounded-2xl shadow p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="rounded-2xl ">
+            <div className="flex flex-col md:flex-row gap-4">
+
                 {/* PICKUP */}
-                <div>
-                    <div className="text-sm font-medium text-gray-700 mb-2">
-                        Pick up location
+                <div ref={pickupRef} className="relative flex-1">
+                    <div
+                        onClick={() => setOpenPickup(!openPickup)}
+                        className="flex items-center justify-between gap-2 px-4 py-3 text-gray-700 bg-white rounded-xl border cursor-pointer hover:border-blue-500 transition"
+                    >
+                        <div className="flex items-center gap-2">
+                            <MapPin className="h-4 w-4 text-black" />
+                            <span className="text-sm">
+                                {pickupLocationId
+                                    ? getLocationName(pickupLocationId)
+                                    : "Select pickup location"}
+                            </span>
+                        </div>
+                        <ChevronDown className="h-4 w-4" />
                     </div>
 
-                    <select
-                        value={pickupLocationId}
-                        onChange={(e) => onPickupChange(e.target.value)}
-                        className="
-                            w-full rounded-xl border px-4 py-3
-                            bg-gray-50 text-sm
-                            focus:outline-none focus:ring-2 focus:ring-blue-500
-                        "
-                    >
-                        <option value="">Select pickup location</option>
-                        {locations.map(loc => (
-                            <option key={loc.id} value={loc.id}>
-                                {loc.name}
-                            </option>
-                        ))}
-                    </select>
+                    {openPickup && (
+                        <div className="absolute mt-2 w-full bg-white border rounded-xl shadow-lg z-[9999] max-h-60 overflow-auto">
+                            {locations.map((loc) => (
+                                <div
+                                    key={loc.id}
+                                    onClick={() => {
+                                        onPickupChange(loc.id);
+                                        setOpenPickup(false);
+                                    }}
+                                    className="px-4 py-3 text-sm hover:bg-blue-50 cursor-pointer transition"
+                                >
+                                    {loc.name}
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 {/* DROPOFF */}
-                <div>
-                    <div className="text-sm font-medium text-gray-700 mb-2">
-                        Drop off location
+                <div ref={dropoffRef} className="relative flex-1">
+                    <div
+                        onClick={() => setOpenDropoff(!openDropoff)}
+                        className="flex items-center justify-between gap-2 px-4 py-3 text-gray-700 bg-white rounded-xl border cursor-pointer hover:border-blue-500 transition"
+                    >
+                        <div className="flex items-center gap-2">
+                            <MapPin className="h-4 w-4 text-black" />
+                            <span className="text-sm">
+                                {dropoffLocationId
+                                    ? getLocationName(dropoffLocationId)
+                                    : "Select dropoff location"}
+                            </span>
+                        </div>
+                        <ChevronDown className="h-4 w-4" />
                     </div>
 
-                    <select
-                        value={dropoffLocationId}
-                        onChange={(e) => onDropoffChange(e.target.value)}
-                        className="
-                            w-full rounded-xl border px-4 py-3
-                            bg-gray-50 text-sm
-                            focus:outline-none focus:ring-2 focus:ring-blue-500
-                        "
-                    >
-                        <option value="">Select dropoff location</option>
-                        {locations.map(loc => (
-                            <option key={loc.id} value={loc.id}>
-                                {loc.name}
-                            </option>
-                        ))}
-                    </select>
+                    {openDropoff && (
+                        <div className="absolute mt-2 w-full bg-white border rounded-xl shadow-lg z-[9999] max-h-60 overflow-auto">
+                            {locations.map((loc) => (
+                                <div
+                                    key={loc.id}
+                                    onClick={() => {
+                                        onDropoffChange(loc.id);
+                                        setOpenDropoff(false);
+                                    }}
+                                    className="px-4 py-3 text-sm hover:bg-blue-50 cursor-pointer transition"
+                                >
+                                    {loc.name}
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
+
             </div>
         </div>
     );

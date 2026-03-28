@@ -14,6 +14,7 @@ public class BookingResponse {
      private OffsetDateTime endDatetime;
      private Double totalPrice;
      private String status;
+     private String cancellationReason;
      private CarSummaryDto car;
      private UserSummaryDto user;
 }
