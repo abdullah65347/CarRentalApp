@@ -223,6 +223,7 @@ public class BookingService {
           resp.setEndDatetime(booking.getEndDatetime());
           resp.setTotalPrice(booking.getTotalPrice());
           resp.setStatus(booking.getStatus());
+          resp.setCancellationReason(booking.getCancellationReason());
 
           boolean isAdmin = securityService.hasRole("ROLE_ADMIN");
           boolean isOwner = securityService.hasRole("ROLE_OWNER");

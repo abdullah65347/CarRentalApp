@@ -1,16 +1,23 @@
-import { Search, MapPin, Calendar } from "lucide-react";
+import { Search, Calendar } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { heroCar } from "../../assets/assets";
 import Button from "../ui/Button";
 import DateRangePicker from "../booking/DateRangePicker";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import LocationPicker from "../location/LocationPicker";
+import { ENDPOINTS } from "../../api/endpoints";
+import api from "../../api/apiClient";
 
 export default function HeroSection() {
-    const [pickupLocation, setPickupLocation] = useState("");
-    const [dropoffLocation, setDropoffLocation] = useState("");
+    const [pickupLocationId, setPickupLocationId] = useState("");
+    const [dropoffLocationId, setDropoffLocationId] = useState("");
     const [pickupDate, setPickupDate] = useState("");
     const [dropoffDate, setDropoffDate] = useState("");
     const [openPicker, setOpenPicker] = useState(null);
+    const [locations, setLocations] = useState([]);
+    const [loadingLocations, setLoadingLocations] = useState(true);
+    const navigate = useNavigate();
 
     function formatDate(value) {
         if (!value) return "";
@@ -20,8 +27,29 @@ export default function HeroSection() {
             year: "numeric",
         });
     }
+    const handleClick = () => {
+        navigate("/cars");
+    };
+
+    useEffect(() => {
+        async function fetchLocations() {
+            try {
+                const response = await api.get(ENDPOINTS.LOCATIONS.LIST);
+                setLocations(response.data);
+            } catch (error) {
+                console.error("Error fetching locations:", error);
+            } finally {
+                setLoadingLocations(false);
+            }
+        }
+
+        fetchLocations();
+    }, []);
+
+
+
     return (
-        <section className="relative min-h-[92vh] flex items-center overflow-hidden">
+        <section className="relative min-h-[92vh] flex items-center">
             {/* Background */}
             <div className="absolute inset-0">
                 <img
@@ -39,7 +67,7 @@ export default function HeroSection() {
             </div>
 
             {/* Content */}
-            <div className="container px-6 md:px-10 lg:px-20 relative z-10">
+            <div className="container px-6 md:px-10 lg:px-20 relative ">
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -61,30 +89,17 @@ export default function HeroSection() {
                         transition={{ duration: 0.8, delay: 0.3 }}
                         className="bg-gray-100 rounded-2xl p-3 shadow-lg flex flex-col gap-3"
                     >
-                        {/* LOCATION ROW */}
-                        <div className="flex flex-col md:flex-row gap-3">
-                            <div className="flex items-center gap-2 px-4 py-3 flex-1 bg-white rounded-xl">
-                                <MapPin className="h-4 w-4 text-black" />
-                                <input
-                                    type="text"
-                                    placeholder="Pick-up location"
-                                    value={pickupLocation}
-                                    onChange={(e) => setPickupLocation(e.target.value)}
-                                    className="bg-transparent text-sm outline-none w-full"
-                                />
-                            </div>
-
-                            <div className="flex items-center gap-2 px-4 py-3 flex-1 bg-white rounded-xl">
-                                <MapPin className="h-4 w-4 text-black" />
-                                <input
-                                    type="text"
-                                    placeholder="Drop-off location"
-                                    value={dropoffLocation}
-                                    onChange={(e) => setDropoffLocation(e.target.value)}
-                                    className="bg-transparent text-sm outline-none w-full"
-                                />
-                            </div>
-                        </div>
+                        {loadingLocations ? (
+                            <div className="text-sm text-gray-500">Loading locations...</div>
+                        ) : (
+                            <LocationPicker
+                                pickupLocationId={pickupLocationId}
+                                dropoffLocationId={dropoffLocationId}
+                                locations={locations}
+                                onPickupChange={setPickupLocationId}
+                                onDropoffChange={setDropoffLocationId}
+                            />
+                        )}
 
                         {/* DATE ROW */}
                         <div className="flex flex-col md:flex-row gap-3 relative">
@@ -149,7 +164,7 @@ export default function HeroSection() {
                         </div>
 
                         {/* BUTTON */}
-                        <Button size="lg" className="btn-dark-gradient rounded-xl">
+                        <Button size="lg" onClick={handleClick} className="btn-dark-gradient rounded-xl">
                             <Search className="h-4 w-4" />
                             Search
                         </Button>

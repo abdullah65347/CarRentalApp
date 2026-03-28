@@ -23,6 +23,7 @@ export default function BookingCheckout({ car, locations }) {
     const [loading, setLoading] = useState(false);
     const [carImage, setCarImage] = useState(null);
     const navigate = useNavigate();
+
     /* ================= FETCH CAR IMAGE ================= */
     useEffect(() => {
         if (!car?.id) return;

@@ -3,17 +3,27 @@ import { Star, Fuel, Users, Gauge } from "lucide-react";
 import api from "../../api/apiClient";
 import { ENDPOINTS } from "../../api/endpoints";
 import { BACKEND_BASE_URL } from "../../config/env";
+import Spinner from "../ui/Spinner";
 
 export default function CarCard({ car, onView, index = 0 }) {
     const [image, setImage] = useState(null);
+    const [loadingImage, setLoadingImage] = useState(true);
 
     useEffect(() => {
+        setLoadingImage(true);
+
         api.get(ENDPOINTS.CARIMAGES.IMAGES(car.id))
             .then(res => {
                 const primary = res.data.find(img => img.isPrimary);
-                if (primary) setImage(BACKEND_BASE_URL + primary.url);
+                if (primary) {
+                    setImage(BACKEND_BASE_URL + primary.url);
+                }
             })
-            .catch(() => { });
+            .catch(() => { })
+            .finally(() => {
+                // We don't stop loading here yet
+                // Wait until actual <img> loads
+            });
     }, [car.id]);
 
     return (
@@ -21,11 +31,20 @@ export default function CarCard({ car, onView, index = 0 }) {
 
             {/* IMAGE */}
             <div className="relative h-48 overflow-hidden">
+
+                {loadingImage && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-gray-100 z-10">
+                        <Spinner size="md" />
+                    </div>
+                )}
+
                 <img
                     src={image || "/car-placeholder.png"}
                     alt={car.make}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
+                    onLoad={() => setLoadingImage(false)}
+                    onError={() => setLoadingImage(false)}
+                    className={`w-full h-full object-cover transition-all duration-500 
+${loadingImage ? "opacity-0" : "opacity-100"}`} />
             </div>
 
             {/* CONTENT */}

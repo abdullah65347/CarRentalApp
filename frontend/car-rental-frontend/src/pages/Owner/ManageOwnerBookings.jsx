@@ -12,6 +12,7 @@ export default function ManageOwnerBookings({ bookings, reload }) {
     const [selectedBooking, setSelectedBooking] = useState(null);
     const [loading, setLoading] = useState(false);
     const [cancellingId, setCancellingId] = useState(null);
+    const [cancelReason, setCancelReason] = useState("");
 
     function closeModal() {
         setSelectedBooking(null);
@@ -25,7 +26,7 @@ export default function ManageOwnerBookings({ bookings, reload }) {
             setCancellingId(selectedBooking.id);
 
             await api.put(
-                ENDPOINTS.BOOKINGS.CANCEL(selectedBooking.id)
+                `${ENDPOINTS.BOOKINGS.CANCEL(selectedBooking.id)}?reason=${encodeURIComponent(cancelReason)}`
             );
 
             show("Booking cancelled successfully", "success");
@@ -104,8 +105,13 @@ export default function ManageOwnerBookings({ bookings, reload }) {
                         This action cannot be undone.
                     </p>
                     <div>
-                        <input className="input" type="text" placeholder="Give reason for cancellation..." />
-                    </div>
+                        <input
+                            className="input"
+                            type="text"
+                            placeholder="Give reason for cancellation..."
+                            value={cancelReason}
+                            onChange={(e) => setCancelReason(e.target.value)}
+                        />                    </div>
                 </div>
             </Modal>
         </>
