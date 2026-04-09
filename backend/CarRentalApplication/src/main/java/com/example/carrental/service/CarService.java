@@ -128,7 +128,7 @@ public class CarService {
      }
 
      /**
-      * List cars with filters (pagination removed)
+      * List cars with filters
       */
      public List<CarResponse> listCars(String city, Double minPrice, Double maxPrice,
                                        Integer seats, String carType) {

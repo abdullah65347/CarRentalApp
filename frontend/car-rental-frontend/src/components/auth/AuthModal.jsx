@@ -118,7 +118,7 @@ export default function AuthModal() {
                         className="auth-input"
                     />
 
-                    <button className="auth-btn" disabled={loading}>
+                    <button className="auth-btn bg-blue-700" disabled={loading}>
                         {loading
                             ? "Please wait..."
                             : isLogin

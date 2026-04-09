@@ -30,6 +30,11 @@ export const ENDPOINTS = {
         CANCEL: (id) => `/bookings/${id}/cancel`,
     },
 
+    AVAILABILITY: {
+        CHECK: "/availability/check",
+        AVAILABLE_CARS_LIST: "/availability/cars"
+    },
+
     ADMIN: {
         USERS: "/admin/users",
         UPDATE_ROLES: (id, rolesCsv) => `/admin/users/${id}/roles?roles=${rolesCsv}`,

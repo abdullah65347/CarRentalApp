@@ -75,15 +75,3 @@ CREATE TABLE reviews (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE INDEX idx_review_car ON reviews(car_id);
-
--- Availability
-CREATE TABLE availability (
-  id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  car_id BIGINT,
-  start_datetime DATETIME NOT NULL,
-  end_datetime DATETIME NOT NULL,
-  available_flag BOOLEAN DEFAULT TRUE,
-  CONSTRAINT fk_avail_car FOREIGN KEY (car_id) REFERENCES cars(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-CREATE INDEX idx_avail_car_start_end ON availability(car_id, start_datetime, end_datetime);

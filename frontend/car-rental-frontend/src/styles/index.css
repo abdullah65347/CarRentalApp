@@ -214,7 +214,7 @@ body {
     border-radius: 0.75rem;
     font-weight: 500;
     color: #fff;
-    background: linear-gradient(135deg, #4f46e5, #6366f1, #818cf8);
+    background: linear-gradient(135deg, #1d4ed8, #2563eb, #3b82f6);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 

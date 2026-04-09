@@ -27,10 +27,17 @@ export default function HeroSection() {
             year: "numeric",
         });
     }
-    const handleClick = () => {
-        navigate("/cars");
-    };
 
+    const handleClick = () => {
+        navigate("/cars", {
+            state: {
+                pickupDate,
+                dropoffDate,
+                pickupLocationId,
+                dropoffLocationId,
+            },
+        });
+    };
     useEffect(() => {
         async function fetchLocations() {
             try {

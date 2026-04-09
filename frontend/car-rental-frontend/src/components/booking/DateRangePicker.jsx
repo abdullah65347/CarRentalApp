@@ -21,6 +21,11 @@ export default function DateRangePicker({
 
     /* ---------- SAVE ---------- */
     function saveAndClose() {
+        if (!selectedDate) {
+            onClose?.();
+            return;
+        }
+
         const date = new Date(selectedDate);
 
         let h = hour % 12;
@@ -29,6 +34,21 @@ export default function DateRangePicker({
         date.setHours(h);
         date.setMinutes(minute);
         date.setSeconds(0);
+
+        if (minDate) {
+            const min = new Date(minDate);
+
+            const selectedDay = new Date(date);
+            selectedDay.setHours(0, 0, 0, 0);
+
+            const minDay = new Date(min);
+            minDay.setHours(0, 0, 0, 0);
+
+            if (selectedDay <= minDay) {
+                alert("Drop-off must be after pickup date");
+                return;
+            }
+        }
 
         onSave(date.toISOString());
         onClose?.();
@@ -46,7 +66,7 @@ export default function DateRangePicker({
             {/* BACKDROP — REAL OUTSIDE CLICK */}
             <div
                 className="absolute inset-0 bg-black/30"
-                onClick={saveAndClose}
+                onClick={onClose}
             />
 
             {/* PICKER */}
@@ -58,7 +78,7 @@ export default function DateRangePicker({
                 <div className="px-6 py-4 border-b">
                     <div className="text-sm text-gray-500">{title}</div>
                     <div className="text-lg font-semibold">
-                        {selectedDate.toDateString()} ·{" "}
+                        {selectedDate ? selectedDate.toDateString() : "Select date"} ·{" "}
                         {String(hour).padStart(2, "0")}:
                         {String(minute).padStart(2, "0")} {ampm}
                     </div>
@@ -68,9 +88,12 @@ export default function DateRangePicker({
                     {/* CALENDAR */}
                     <div className="p-5">
                         <DayPicker
+                            key={minDate}
                             mode="single"
                             selected={selectedDate}
-                            onSelect={setSelectedDate}
+                            onSelect={(date) => {
+                                if (date) setSelectedDate(date);
+                            }}
                             disabled={
                                 minDate
                                     ? { before: new Date(minDate) }
