@@ -1,40 +1,56 @@
+import { Calendar } from "lucide-react";
+
 export default function DateHeader({
     pickupDate,
     returnDate,
     onOpen,
 }) {
     function format(val) {
-        if (!val) return "Select date & time";
+        if (!val) return "";
         return new Date(val).toLocaleString();
     }
 
     return (
-        <div className="flex gap-6 bg-white p-4 rounded-xl shadow">
+        <div className="flex gap-4">
+
             {/* PICKUP */}
             <button
                 onClick={() => onOpen("PICKUP")}
-                className="flex-1 text-left border rounded-xl p-3 hover:bg-gray-50"
+                className="flex items-center gap-3 flex-1 bg-gray-100 px-4 py-3 rounded-xl hover:bg-gray-200 transition"
             >
-                <div className="font-semibold text-indigo-700">
-                    Pick-Up Date
-                </div>
-                <div className="text-sm text-gray-500">
-                    {format(pickupDate)}
+                <Calendar className="w-5 h-5 text-gray-500" />
+
+                <div className="text-left">
+                    <div className="text-sm text-gray-400">
+                        Pick-up date
+                    </div>
+                    {pickupDate && (
+                        <div className="text-sm font-medium text-gray-800">
+                            {format(pickupDate)}
+                        </div>
+                    )}
                 </div>
             </button>
 
             {/* RETURN */}
             <button
                 onClick={() => onOpen("RETURN")}
-                className="flex-1 text-left border rounded-xl p-3 hover:bg-gray-50"
+                className="flex items-center gap-3 flex-1 bg-gray-100 px-4 py-3 rounded-xl hover:bg-gray-200 transition"
             >
-                <div className="font-semibold text-indigo-700">
-                    Return Date
-                </div>
-                <div className="text-sm text-gray-500">
-                    {format(returnDate)}
+                <Calendar className="w-5 h-5 text-gray-500" />
+
+                <div className="text-left">
+                    <div className="text-sm text-gray-400">
+                        Drop-off date
+                    </div>
+                    {returnDate && (
+                        <div className="text-sm font-medium text-gray-800">
+                            {format(returnDate)}
+                        </div>
+                    )}
                 </div>
             </button>
+
         </div>
     );
 }

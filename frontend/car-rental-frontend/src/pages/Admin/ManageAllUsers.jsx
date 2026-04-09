@@ -89,7 +89,7 @@ export default function ManageAllUsers({ users, reload }) {
                                                     currentRole
                                                 )}`}
                                             >
-                                                {currentRole.replace("ROLE_", "")}
+                                                {currentRole?.replace("ROLE_", "") || "USER"}
                                             </span>
                                         </div>
                                         <div className="text-sm text-gray-600">

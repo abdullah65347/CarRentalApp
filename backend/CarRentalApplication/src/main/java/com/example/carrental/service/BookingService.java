@@ -105,6 +105,12 @@ public class BookingService {
           User user = userRepository.findByEmail(email)
                   .orElseThrow(() -> new ForbiddenException("Authenticated user not found in DB"));
 
+          boolean alreadyPending = bookingRepository
+                  .existsByUserIdAndCarIdAndStatus(user.getId(), car.getId(), "PENDING");
+
+          if (alreadyPending) {
+               throw new BadRequestException("You already have a pending booking for this car");
+          }
           // calculate total price (simple day-based calculation)
           long hours = Duration.between(req.getStartDatetime(), req.getEndDatetime()).toHours();
           if (hours <= 0) hours = 24;

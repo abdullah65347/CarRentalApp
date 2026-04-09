@@ -40,7 +40,7 @@ public class SecurityConfig {
                   .csrf(csrf -> csrf.disable())
                   .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                   .authorizeHttpRequests(authorize -> authorize
-                          .requestMatchers("/api/auth/login", "/api/auth/register","/api/locations/**", "/api/cars/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/uploads/**").permitAll()
+                          .requestMatchers("/api/auth/login", "/api/auth/register","/api/locations/**", "/api/cars/**", "/api/availability/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/uploads/**").permitAll()
                           .anyRequest().authenticated()
                   )
                   .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
@@ -53,7 +53,7 @@ public class SecurityConfig {
           CorsConfiguration config = new CorsConfiguration();
           // exact origin(s) — DO NOT use "*" when allowCredentials = true
           config.setAllowedOrigins(List.of("http://localhost:5173"));
-          config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+          config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE"));
           config.setAllowedHeaders(List.of("*"));
           config.setAllowCredentials(true);
           // optional: expose headers like Authorization if you need them on client

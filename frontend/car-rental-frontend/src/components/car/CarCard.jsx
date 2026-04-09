@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Star, Fuel, Users, Gauge } from "lucide-react";
+import { Fuel, Users, Gauge } from "lucide-react";
 import api from "../../api/apiClient";
 import { ENDPOINTS } from "../../api/endpoints";
 import { BACKEND_BASE_URL } from "../../config/env";
@@ -10,20 +10,32 @@ export default function CarCard({ car, onView, index = 0 }) {
     const [loadingImage, setLoadingImage] = useState(true);
 
     useEffect(() => {
+        let isMounted = true;
         setLoadingImage(true);
 
         api.get(ENDPOINTS.CARIMAGES.IMAGES(car.id))
             .then(res => {
+                if (!isMounted) return;
+
                 const primary = res.data.find(img => img.isPrimary);
+
                 if (primary) {
                     setImage(BACKEND_BASE_URL + primary.url);
+                } else {
+                    setImage("/car-placeholder.png"); // fallback
+                    setLoadingImage(false);
                 }
             })
-            .catch(() => { })
-            .finally(() => {
-                // We don't stop loading here yet
-                // Wait until actual <img> loads
+            .catch(() => {
+                if (isMounted) {
+                    setImage("/car-placeholder.png");
+                    setLoadingImage(false);
+                }
             });
+
+        return () => {
+            isMounted = false;
+        };
     }, [car.id]);
 
     return (
