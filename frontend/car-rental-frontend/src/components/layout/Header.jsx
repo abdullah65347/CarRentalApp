@@ -9,6 +9,7 @@ export default function Header() {
     const { user } = useContext(AuthContext);
     const { openLogin, openRegister } = useContext(AuthModalContext);
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [profileOpen, setProfileOpen] = useState(false);
 
     const roles = user?.roles || [];
 
@@ -68,12 +69,51 @@ export default function Header() {
 
                     {/* AUTH */}
                     {user ? (
-                        <Link
-                            to="/profile"
-                            className="ml-4 w-9 h-9 rounded-full bg-yellow-900 text-slate-100 flex items-center justify-center font-semibold"
-                        >
-                            {initials(user.name)}
-                        </Link>
+                        <div className="relative ml-4">
+                            <button
+                                onClick={() => setProfileOpen(!profileOpen)}
+                                className="w-9 h-9 rounded-full bg-yellow-900 text-slate-100 flex items-center justify-center font-semibold"
+                            >
+                                {initials(user.name)}
+                            </button>
+
+                            {profileOpen && (
+                                <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-100 rounded-xl shadow-lg p-4 z-50">
+
+                                    {/* USER INFO */}
+                                    <div className="mb-3">
+                                        <div className="font-semibold text-gray-900">
+                                            {user.name}
+                                        </div>
+                                        <div className="text-sm text-gray-500">
+                                            {user.email}
+                                        </div>
+                                    </div>
+
+                                    <div className="border-t border-gray-100 my-2" />
+
+                                    {/* MY BOOKINGS */}
+                                    <Link
+                                        to="/me/bookings"
+                                        onClick={() => setProfileOpen(false)}
+                                        className="block px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-gray-50"
+                                    >
+                                        My Bookings
+                                    </Link>
+
+                                    {/* LOGOUT */}
+                                    <button
+                                        onClick={() => {
+                                            localStorage.removeItem("access_token");
+                                            window.location.href = "/";
+                                        }}
+                                        className="w-full text-left px-3 py-2 rounded-lg text-sm text-red-600 hover:bg-red-50"
+                                    >
+                                        Logout
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     ) : (
                         <div className="flex items-center gap-2 ml-4">
                             <Button variant="ghost" size="md" onClick={openLogin}>
