@@ -6,9 +6,6 @@ import Footer from "./components/layout/Footer";
 
 import HomePage from "./pages/HomePage";
 
-// import LoginPage from "./pages/Auth/LoginPage";
-// import RegisterPage from "./pages/Auth/RegisterPage";
-
 import MyBookings from "./pages/Booking/MyBookings";
 import Profile from "./pages/Profile";
 import OwnerDashboard from "./pages/Owner/OwnerDashboard";

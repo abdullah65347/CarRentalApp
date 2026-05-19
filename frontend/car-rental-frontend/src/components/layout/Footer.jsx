@@ -8,8 +8,8 @@ export default function Footer() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
                     <div>
                         <div className="flex items-center gap-2 mb-4">
-                            <div className="bg-blue-700 rounded-lg p-1.5">
-                                <Car className="h-4 w-4 text-primary-foreground" />
+                            <div className="bg-yellow-500 rounded-xl p-2">
+                                <Car className="h-5 w-5 text-gray-900" />
                             </div>
                             <span className="text-lg font-bold font-display text-primary-foreground">CarRental</span>
                         </div>

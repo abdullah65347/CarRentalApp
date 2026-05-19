@@ -5,6 +5,9 @@ import CarDetailModal from "../components/car/CarDetailModal";
 import HeroSection from "../components/Home/HeroSection";
 import FeaturedSection from "../components/Home/FeaturedSection";
 import HowItWorks from "../components/Home/HowItWorks";
+import WhyChooseUs from "../components/Home/WhyChooseUs";
+import Testimonials from "../components/Home/Testimonials";
+import CTABanner from "../components/Home/Ctabanner";
 
 export default function HomePage() {
     const [cars, setCars] = useState([]);
@@ -30,15 +33,16 @@ export default function HomePage() {
             <div className="space-y-12">
                 <HeroSection />
 
-                {/* FEATURED CARS */}
                 <FeaturedSection
                     cars={cars}
                     loading={loading}
                     setSelectedCar={setSelectedCar}
                 />
 
-                {/* HOW IT WORKS */}
                 <HowItWorks />
+                <WhyChooseUs />
+                <Testimonials />
+                <CTABanner />
             </div>
 
             <CarDetailModal
